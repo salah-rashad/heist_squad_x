@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "400253650318",
+    "project_id": "heist-squad",
+    "storage_bucket": "heist-squad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:400253650318:android:e37cdeb7cca769d82990df",
+        "android_client_info": {
+          "package_name": "com.bemo.heist_squad_x"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "400253650318-n4g7teiigkj7nj0k43l61fh899q02rre.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCk4fbsP_VHahkyyfe4mHCBSWQDOb7lkZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "400253650318-n4g7teiigkj7nj0k43l61fh899q02rre.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
