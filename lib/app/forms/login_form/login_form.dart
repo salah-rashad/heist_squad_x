@@ -9,7 +9,7 @@ class LoginForm extends GetWidget<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: controller.key,
+      key: controller.loginFormKey,
       autovalidateMode: AutovalidateMode.disabled,
       child: Column(
         children: <Widget>[
@@ -84,7 +84,7 @@ class LoginForm extends GetWidget<LoginController> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  final FormState formState = controller.key.currentState;
+                  final FormState formState = controller.loginFormKey.currentState;
                   if (formState.validate()) {
                     // Login User
                   }

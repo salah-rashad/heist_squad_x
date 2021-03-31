@@ -11,7 +11,7 @@ class AuthController extends GetxController {
   /* ************** */
 
   
-  final firebaseUser = AuthProvider.auth.currentUser;
+  final firebaseUser = Auth.auth.currentUser;
 
 
   @override
