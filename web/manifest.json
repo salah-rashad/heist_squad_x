@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
     "name": "Heist Squad",
     "short_name": "Heist Squad",
+=======
+    "name": "heist_squad_x",
+    "short_name": "heist_squad_x",
+>>>>>>> 1d0a6f2f738a8daa26e18f9295cd9adc1e0f379e
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

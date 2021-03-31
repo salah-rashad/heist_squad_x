@@ -39,5 +39,8 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+<<<<<<< HEAD
 
 /assets/temp
+=======
+>>>>>>> 1d0a6f2f738a8daa26e18f9295cd9adc1e0f379e

@@ -24,7 +24,6 @@ void main() async {
 
   if (!kIsWeb) {
     await util.setLandscape();
-
     await util.fullScreen();
 
     await util.setOrientations([

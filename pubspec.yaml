@@ -82,6 +82,7 @@ flutter:
   assets:
     # - assets/
     # - assets/images/
+<<<<<<< HEAD
     - assets/images/weapons/
     - assets/images/icons/
     # - assets/images/tile/
@@ -90,11 +91,21 @@ flutter:
     # - assets/images/sprites/player/
     - assets/audio/
     - assets/audio/breaking_wood/
+=======
+    # - assets/images/weapons/
+    # - assets/images/icons/
+    # - assets/images/tile/
+    # - assets/images/items/
+    - assets/audio/
+    # - assets/images/indoor/
+    # - assets/images/sprites/player/
+>>>>>>> 1d0a6f2f738a8daa26e18f9295cd9adc1e0f379e
     - assets/logo/
     
 
     - assets/
     - assets/images/
+<<<<<<< HEAD
     - assets/images/tiled/
     - assets/images/heroes/
     - assets/images/emotes/
@@ -103,6 +114,11 @@ flutter:
     - assets/images/tiled/tiles/tile/
     - assets/images/tiled/tiles/indoor/
     - assets/images/players/
+=======
+    - assets/images/tile/
+    - assets/images/heroes/
+    - assets/images/emotes/
+>>>>>>> 1d0a6f2f738a8daa26e18f9295cd9adc1e0f379e
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
