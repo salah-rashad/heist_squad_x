@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:bonfire/bonfire.dart';
 import 'package:bonfire/util/direction.dart';
 import 'package:flame/animation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:heist_squad_x/game/objects/breakable.dart';
 import 'package:heist_squad_x/game/utils/AxisD.dart';
 import 'package:heist_squad_x/game/utils/LootableType.dart';

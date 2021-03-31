@@ -2,13 +2,12 @@ import 'dart:ui';
 
 import 'package:bonfire/bonfire.dart';
 import 'package:bonfire/util/direction.dart';
+import 'package:flame/anchor.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:heist_squad_x/game/player/game_player.dart';
 
 import 'AxisD.dart';
 import 'Weapon.dart';
-import 'package:flame/anchor.dart';
-import 'package:get/utils.dart';
 
 mixin GameExtensions {}
 

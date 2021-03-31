@@ -8,7 +8,6 @@ import 'package:heist_squad_x/game/utils/LootableType.dart';
 import 'package:heist_squad_x/game/utils/Weapon.dart';
 import 'package:heist_squad_x/game/utils/game_extensions.dart';
 import 'package:heist_squad_x/main.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Cupboard extends Destroyable {
   final Direction direction;

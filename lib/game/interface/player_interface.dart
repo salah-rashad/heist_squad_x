@@ -2,10 +2,9 @@ import 'dart:ui';
 
 import 'package:bonfire/bonfire.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:heist_squad_x/game/player/game_player.dart';
 import 'package:heist_squad_x/game/player/remote_player.dart';
-import 'package:heist_squad_x/app/theme/color_theme.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'bar_life_component.dart';
 

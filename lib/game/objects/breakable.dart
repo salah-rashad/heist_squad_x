@@ -6,6 +6,7 @@ import 'package:bonfire/util/collision/object_collision.dart';
 import 'package:flame/animation.dart' as FlameAnimation;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/theme/app_theme.dart';
@@ -17,14 +18,11 @@ import 'package:heist_squad_x/game/utils/AxisD.dart';
 import 'package:heist_squad_x/game/utils/LootableType.dart';
 import 'package:heist_squad_x/game/utils/Weapon.dart';
 import 'package:heist_squad_x/game/utils/game_extensions.dart';
-import 'package:heist_squad_x/game/weapon/weapon.dart';
 import 'package:heist_squad_x/main.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
   bool isClose = false;
 
-  int _timeLeft = 0;
   Timer destroyTimer;
 
   bool isBeingDestroyed = false;
@@ -451,7 +449,6 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
           this.receiveDamage(1, player);
         }
 
-        this._timeLeft = life.toInt();
       },
     );
   }
@@ -542,134 +539,6 @@ SimpleDirectionAnimation generateSDA(
     //
   );
 }
-
-/* enum PositionAlign {
-  right,
-  left,
-  top,
-  bottom,
-  center,
-}
-
-Position generatePosition(
-    AxisD axisD,
-    Direction direction,
-    Position initPosition,
-    double height,
-    double width,
-    Collision _hCollision,
-    Collision _vCollision,
-    LType type,
-    {PositionAlign alignment = PositionAlign.center}) {
-  double x;
-  double y;
-  Position finalPosition;
-
-  Rect rect = Rect.fromCenter(
-    center: Offset(initPosition.x, initPosition.y),
-    height: tileSize,
-    width: tileSize,
-  );
-
-  Offset hCollCenter = Offset(
-    _hCollision.width * 0.5,
-    _hCollision.height * 0.5,
-  );
-
-  Offset vCollCenter = Offset(
-    _vCollision.width * 0.5,
-    _vCollision.height * 0.5,
-  );
-
-  if (axisD == AxisD.h) {
-    switch (alignment) {
-      case PositionAlign.left:
-        finalPosition = Position(_hCollision.width * 0.5, height * 0.5);
-        finalPosition = Position(
-            rect.centerLeft.dx - _hCollision.width * 0.5, rect.center.dy);
-        break;
-      case PositionAlign.right:
-        finalPosition =
-            Position(width - _hCollision.width * 0.5, rect.center.dy);
-        break;
-      case PositionAlign.center:
-        finalPosition =
-            Position(rect.center.dx, rect.center.dy + hCollCenter.dy);
-        break;
-
-      case PositionAlign.top:
-        finalPosition = Position(width * 0.5, _hCollision.height);
-        break;
-      case PositionAlign.bottom:
-        finalPosition =
-            Position(width * 0.5, height - _hCollision.height * 0.5);
-        break;
-    }
-  } else if (axisD == AxisD.v) {
-    switch (alignment) {
-      case PositionAlign.left:
-        finalPosition = Position(_vCollision.width * 0.5, height * 0.5);
-        break;
-      case PositionAlign.right:
-        finalPosition = Position(width - _vCollision.width * 0.5, height * 0.5);
-        break;
-      case PositionAlign.center:
-        finalPosition = Position(width * 0.5, height * 0.5);
-        break;
-
-      case PositionAlign.top:
-        finalPosition = Position(width * 0.5, _vCollision.height);
-        break;
-      case PositionAlign.bottom:
-        finalPosition =
-            Position(width * 0.5, height - _vCollision.height * 0.5);
-        break;
-    }
-  }
-
-  switch (direction) {
-    case Direction.left:
-      finalPosition = Position(width - _vCollision.width * 0.5, height * 0.5);
-      break;
-    case Direction.right:
-      // TODO: Handle this case.
-      break;
-    case Direction.top:
-      finalPosition = Position(rect.bottomCenter.dx, rect.bottomCenter.dy);
-
-      break;
-    case Direction.bottom:
-      finalPosition = Position(rect.topCenter.dx, rect.center.dy);
-      break;
-    case Direction.topLeft:
-      // TODO: Handle this case.
-      break;
-    case Direction.topRight:
-      // TODO: Handle this case.
-      break;
-    case Direction.bottomLeft:
-      // TODO: Handle this case.
-      break;
-    case Direction.bottomRight:
-      // TODO: Handle this case.
-      break;
-  }
-
-  if (axisD == AxisD.h) {
-    x = initPosition.x;
-    y = finalPosition.y - tileSize;
-    if (type == LType.door) y += 6;
-  } else if (axisD == AxisD.v) {
-    // TODO: test this later
-    x = (finalPosition.x) - vCollCenter.dx;
-    y = finalPosition.y - tileSize;
-  } else {
-    x = finalPosition.x;
-    y = finalPosition.y - tileSize;
-  }
-
-  return Position(x, y);
-} */
 
 CollisionArea generateFitCollision(
   Direction direction,

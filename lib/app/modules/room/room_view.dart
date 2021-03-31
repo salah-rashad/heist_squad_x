@@ -1,5 +1,6 @@
 import 'package:bonfire/bonfire.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/data/model/room_model.dart';
 import 'package:heist_squad_x/app/data/model/user_model.dart';
@@ -10,8 +11,6 @@ import 'package:heist_squad_x/app/modules/room/chat/chat_view.dart';
 import 'package:heist_squad_x/app/modules/room/room_controller.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';
 import 'package:heist_squad_x/app/util/clipboard_util.dart';
-import 'package:heist_squad_x/main.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RoomView extends StatelessWidget {
   final Room initialRoom;

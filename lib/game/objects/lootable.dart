@@ -3,18 +3,18 @@ import 'dart:ui';
 
 import 'package:bonfire/bonfire.dart';
 import 'package:bonfire/util/collision/object_collision.dart';
+import 'package:flame/anchor.dart';
 import 'package:flame/animation.dart' as FlameAnimation;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:heist_squad_x/app/theme/app_theme.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';
 import 'package:heist_squad_x/game/player/game_player.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:heist_squad_x/game/utils/AxisD.dart';
 import 'package:heist_squad_x/game/utils/Weapon.dart';
 import 'package:heist_squad_x/game/utils/game_extensions.dart';
-import 'package:flame/anchor.dart';
 
 class Lootable extends GameDecoration with TapGesture, ObjectCollision {
   bool isClose = false;
@@ -36,7 +36,6 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
   final AxisD axisD;
 
   TextConfig _textConfig;
-  Size _txtSize;
 
   Lootable(
     this.maxGain, {
@@ -80,8 +79,6 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
 
     if (this.isVisibleInCamera()) {
       String text = "$currentGain KG";
-
-      _txtSize = _textConfig.toTextPainter(text).size;
 
       _textConfig.render(
         c,

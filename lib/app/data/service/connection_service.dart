@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/data/service/game_socket_manager.dart';
-import 'package:heist_squad_x/app/modules/person_select/person_select_controller.dart';
 import 'package:heist_squad_x/app/modules/room/room_controller.dart';
 
 class Conn extends GetxService {
