@@ -13,7 +13,7 @@ class RegisterController extends GetxController {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  GlobalKey registerFormKey = new GlobalKey<FormState>();
+  final registerFormKey = new GlobalKey<FormState>();
 
   Rx<Weapon> _selectedWeapon = Weapon.crowbar.obs;
   

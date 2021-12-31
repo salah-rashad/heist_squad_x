@@ -1,3 +1,5 @@
+import 'package:bonfire/bonfire.dart';
+
 class ActionAnim {
   static const String CrowbarRight = "CrowbarRight";
   static const String CrowbarLeft = "CrowbarLeft";
@@ -63,4 +65,100 @@ class ActionAnim {
   static const String LootLeft = "LootLeft";
   static const String LootTop = "LootTop";
   static const String LootBottom = "LootBottom";
+
+  static Map<String, SpriteAnimation> anims(SpriteSheet spriteSheet) => {
+        LootRight: spriteSheet.createAnimation(
+          row: 21,
+          stepTime: 0.1,
+          from: 1,
+          to: 4,
+        ),
+        LootLeft:
+            spriteSheet.createAnimation(row: 20, stepTime: 0.1, from: 1, to: 4),
+        LootTop:
+            spriteSheet.createAnimation(row: 20, stepTime: 0.1, from: 5, to: 8),
+        LootBottom:
+            spriteSheet.createAnimation(row: 21, stepTime: 0.1, from: 5, to: 8),
+        /////////////////////////
+        CrowbarRight:
+            spriteSheet.createAnimation(row: 17, stepTime: 0.1, from: 1, to: 4),
+        CrowbarLeft:
+            spriteSheet.createAnimation(row: 16, stepTime: 0.1, from: 1, to: 4),
+        CrowbarTop:
+            spriteSheet.createAnimation(row: 16, stepTime: 0.1, from: 5, to: 8),
+        CrowbarBottom:
+            spriteSheet.createAnimation(row: 17, stepTime: 0.1, from: 5, to: 8),
+        /////////////////////////
+        HammerRight:
+            spriteSheet.createAnimation(row: 5, stepTime: 0.1, from: 0, to: 4),
+        HammerLeft:
+            spriteSheet.createAnimation(row: 4, stepTime: 0.1, from: 0, to: 4),
+        HammerTop:
+            spriteSheet.createAnimation(row: 4, stepTime: 0.1, from: 4, to: 8),
+        HammerBottom:
+            spriteSheet.createAnimation(row: 5, stepTime: 0.1, from: 4, to: 8),
+        /////////////////////////
+        KeysRight:
+            spriteSheet.createAnimation(row: 7, stepTime: 0.1, from: 0, to: 4),
+        KeysLeft:
+            spriteSheet.createAnimation(row: 6, stepTime: 0.1, from: 0, to: 4),
+        KeysTop:
+            spriteSheet.createAnimation(row: 6, stepTime: 0.1, from: 4, to: 8),
+        KeysBottom:
+            spriteSheet.createAnimation(row: 7, stepTime: 0.1, from: 4, to: 8),
+        /////////////////////////
+        KnifeRight:
+            spriteSheet.createAnimation(row: 9, stepTime: 0.1, from: 0, to: 4),
+        KnifeLeft:
+            spriteSheet.createAnimation(row: 8, stepTime: 0.1, from: 0, to: 4),
+        KnifeTop:
+            spriteSheet.createAnimation(row: 8, stepTime: 0.1, from: 4, to: 8),
+        KnifeBottom:
+            spriteSheet.createAnimation(row: 9, stepTime: 0.1, from: 4, to: 8),
+        /////////////////////////
+        DrillRight:
+            spriteSheet.createAnimation(row: 11, stepTime: 0.1, from: 0, to: 4),
+        DrillLeft:
+            spriteSheet.createAnimation(row: 10, stepTime: 0.1, from: 0, to: 4),
+        DrillTop:
+            spriteSheet.createAnimation(row: 10, stepTime: 0.1, from: 4, to: 8),
+        DrillBottom:
+            spriteSheet.createAnimation(row: 11, stepTime: 0.1, from: 4, to: 8),
+        /////////////////////////
+        OscillatorRight:
+            spriteSheet.createAnimation(row: 13, stepTime: 0.1, from: 0, to: 4),
+        OscillatorLeft:
+            spriteSheet.createAnimation(row: 12, stepTime: 0.1, from: 0, to: 4),
+        OscillatorTop:
+            spriteSheet.createAnimation(row: 12, stepTime: 0.1, from: 4, to: 8),
+        OscillatorBottom:
+            spriteSheet.createAnimation(row: 13, stepTime: 0.1, from: 4, to: 8),
+        /////////////////////////
+        ComputerRight:
+            spriteSheet.createAnimation(row: 15, stepTime: 0.1, from: 0, to: 4),
+        ComputerLeft:
+            spriteSheet.createAnimation(row: 14, stepTime: 0.1, from: 0, to: 4),
+        ComputerTop:
+            spriteSheet.createAnimation(row: 14, stepTime: 0.1, from: 4, to: 8),
+        ComputerBottom:
+            spriteSheet.createAnimation(row: 15, stepTime: 0.1, from: 4, to: 8),
+        /////////////////////////
+        SawRight:
+            spriteSheet.createAnimation(row: 19, stepTime: 0.1, from: 0, to: 4),
+        SawLeft:
+            spriteSheet.createAnimation(row: 18, stepTime: 0.1, from: 0, to: 4),
+        SawTop:
+            spriteSheet.createAnimation(row: 18, stepTime: 0.1, from: 4, to: 8),
+        SawBottom:
+            spriteSheet.createAnimation(row: 19, stepTime: 0.1, from: 4, to: 8),
+        /////////////////////////
+        PliersRight:
+            spriteSheet.createAnimation(row: 23, stepTime: 0.1, from: 0, to: 4),
+        PliersLeft:
+            spriteSheet.createAnimation(row: 22, stepTime: 0.1, from: 0, to: 4),
+        PliersTop:
+            spriteSheet.createAnimation(row: 22, stepTime: 0.1, from: 4, to: 8),
+        PliersBottom:
+            spriteSheet.createAnimation(row: 23, stepTime: 0.1, from: 4, to: 8),
+      };
 }

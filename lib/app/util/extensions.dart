@@ -11,16 +11,12 @@ extension StringExtensions on String {
     switch (this) {
       case 'left':
         return Direction.left;
-        break;
       case 'right':
         return Direction.right;
-        break;
       case 'top':
-        return Direction.top;
-        break;
+        return Direction.up;
       case 'bottom':
-        return Direction.bottom;
-        break;
+        return Direction.down;
       default:
         return Direction.left;
     }

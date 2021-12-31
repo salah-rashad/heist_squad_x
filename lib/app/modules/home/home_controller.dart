@@ -1,7 +1,8 @@
-import 'package:flame/flame.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:heist_squad_x/app/data/provider/auth.dart';
 
 class HomeController extends GetxController {
   RxBool _bgmIsPlaying = false.obs;
@@ -11,12 +12,19 @@ class HomeController extends GetxController {
 
   @override
   Future<void> onReady() async {
+    Auth.i.listenToAuthChanges();
     if (!kIsWeb) {
-      await Flame.bgm.play("menu_soundtrack.mp3");
+      await FlameAudio.bgm.play("menu_soundtrack.mp3");
 
-      Flame.bgm.audioPlayer.onPlayerStateChanged.listen((state) {
-        bgmIsPlaying = state == AudioPlayerState.PLAYING;
+      FlameAudio.bgm.audioPlayer!.onPlayerStateChanged.listen((state) {
+        bgmIsPlaying = state == PlayerState.PLAYING;
+        print(state);
       });
+      if (FlameAudio.bgm.audioPlayer!.state == PlayerState.PLAYING) {
+        bgmIsPlaying = true;
+      } else {
+        bgmIsPlaying = false;
+      }
     }
 
     super.onReady();
@@ -24,7 +32,7 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
-    Flame.bgm.dispose();
+    FlameAudio.bgm.dispose();
     super.onClose();
   }
 }

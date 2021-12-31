@@ -10,7 +10,7 @@ class CustomButton extends StatefulWidget {
   final double height;
   final double radius;
   final Widget child;
-  final Function onTap;
+  final VoidCallback? onTap;
 
   CustomButton({
     this.topShadowColor = Palette.BACKGROUND_LIGHT,
@@ -20,8 +20,8 @@ class CustomButton extends StatefulWidget {
     this.width = 40,
     this.height = 40,
     this.radius = 30,
-    @required this.child,
-    @required this.onTap,
+    required this.child,
+    required this.onTap,
   });
 
   @override

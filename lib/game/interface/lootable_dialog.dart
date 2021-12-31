@@ -9,7 +9,6 @@ import 'package:heist_squad_x/game/objects/breakable.dart';
 import 'package:heist_squad_x/game/player/game_player.dart';
 import 'package:heist_squad_x/game/utils/Weapon.dart';
 import 'package:heist_squad_x/game/utils/game_extensions.dart';
-import 'package:heist_squad_x/main.dart';
 
 class LootableDialog extends StatelessWidget {
   final GamePlayer player;
@@ -39,13 +38,14 @@ class LootableDialog extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 32, left: 32),
                       child: Center(
-                          child: Flame.util.spriteAsWidget(
-                              Size(tileSize, tileSize),
-                              lootable.animation.current.getSprite())
-                          // SpriteWidget(
-                          //   sprite: lootable.animation.current.getSprite(),
-                          // ),
-                          ),
+                        child: SpriteAnimationWidget(
+                          playing: false,
+                          animation: lootable.getCurrentAnimation()!,
+                        ),
+                        // SpriteWidget(
+                        //   sprite: lootable.animation.current.getSprite(),
+                        // ),
+                      ),
                     ),
                     SizedBox(
                       width: 16,
@@ -54,7 +54,7 @@ class LootableDialog extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 32),
                         child: Text(
-                          lootable.itemName,
+                          lootable.itemName!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -106,10 +106,10 @@ class LootableDialog extends StatelessWidget {
                         height: 120,
                         child: Builder(
                           builder: (context) {
-                            List<WeaponKey> userWeapons = player.weapons;
+                            List<WeaponKey> userWeapons = player.weapons!;
 
                             List<WeaponKey> availableWeapons =
-                                lootable.canDestroyWeapons;
+                                lootable.canDestroyWeapons!;
 
                             availableWeapons.retainWhere(
                                 (weapon) => userWeapons.contains(weapon));
@@ -126,7 +126,7 @@ class LootableDialog extends StatelessWidget {
                             return ListView.builder(
                               padding: EdgeInsets.only(left: 32.0, right: 32.0),
                               scrollDirection: Axis.horizontal,
-                              itemCount: availableWeapons.length ?? 0,
+                              itemCount: availableWeapons.length,
                               itemBuilder: (context, i) {
                                 WeaponKey weapon = availableWeapons[i];
                                 String name = weapon.getName();

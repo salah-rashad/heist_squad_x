@@ -1,8 +1,7 @@
 import 'dart:ui';
 
 import 'package:bonfire/bonfire.dart';
-import 'package:bonfire/util/direction.dart';
-import 'package:flame/anchor.dart';
+import 'package:bonfire/util/mixins/direction_animation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:heist_squad_x/game/player/game_player.dart';
 
@@ -13,35 +12,33 @@ mixin GameExtensions {}
 
 extension DirectionExtensions on Direction {
   String getName() {
-    return this.toString().replaceAll('Direction.', '');
+    var s = this.toString().replaceAll('Direction.', '');
+    if (s == "down")
+      return "bottom";
+    else if (s == "up")
+      return "top";
+    else
+      return s;
   }
 
   Anchor toAnchor() {
     switch (this) {
       case Direction.left:
         return Anchor.centerLeft;
-        break;
       case Direction.right:
         return Anchor.centerRight;
-        break;
-      case Direction.top:
+      case Direction.up:
         return Anchor.topCenter;
-        break;
-      case Direction.bottom:
+      case Direction.down:
         return Anchor.bottomCenter;
-        break;
-      case Direction.topLeft:
+      case Direction.upLeft:
         return Anchor.topLeft;
-        break;
-      case Direction.topRight:
+      case Direction.upRight:
         return Anchor.topRight;
-        break;
-      case Direction.bottomLeft:
+      case Direction.downLeft:
         return Anchor.bottomLeft;
-        break;
-      case Direction.bottomRight:
+      case Direction.downRight:
         return Anchor.bottomRight;
-        break;
       default:
         return Anchor.center;
     }
@@ -61,43 +58,39 @@ extension WeaponEnumExtensions on WeaponKey {
 }
 
 extension StringExtensions on String {
-  Direction getDirection({bool nullOk = false}) {
+  Direction getDirection() {
     switch (this) {
       case 'left':
         return Direction.left;
-        break;
       case 'right':
         return Direction.right;
-        break;
+
       case 'top':
-        return Direction.top;
-        break;
+        return Direction.up;
+
       case 'bottom':
-        return Direction.bottom;
-        break;
+        return Direction.down;
       default:
-        return nullOk ? null : Direction.left;
+        return Direction.left;
     }
   }
 
-  AxisD getAxisD({bool nullOk = false}) {
+  AxisD getAxisD() {
     switch (this) {
       case 'h':
         return AxisD.h;
-        break;
       case 'v':
         return AxisD.v;
-        break;
 
       default:
-        return nullOk ? null : AxisD.h;
+        return AxisD.h;
     }
   }
 }
 
 extension PlayerExtensions on GamePlayer {
   bool isCloseTo(Rect rect) {
-    Rect coll = this.rectCollision;
+    Rect coll = this.rectCollision.rect;
 
     Rect vTop = Rect.fromLTWH(
       coll.topCenter.dx,
@@ -137,7 +130,50 @@ extension PlayerExtensions on GamePlayer {
   }
 }
 
-extension TextConfigExtensions on TextConfig {
+extension ExtDirectionAnimation on DirectionAnimation {
+  SpriteAnimation? getCurrentAnimation() {
+    switch (animation?.currentType ?? SimpleAnimationEnum.idleLeft) {
+      case SimpleAnimationEnum.idleLeft:
+        return animation?.idleLeft;
+      case SimpleAnimationEnum.idleRight:
+        return animation?.idleRight;
+      case SimpleAnimationEnum.idleUp:
+        return animation?.idleUp;
+      case SimpleAnimationEnum.idleDown:
+        return animation?.idleDown;
+      case SimpleAnimationEnum.idleTopLeft:
+        return animation?.idleUpLeft;
+      case SimpleAnimationEnum.idleTopRight:
+        return animation?.idleUpRight;
+      case SimpleAnimationEnum.idleDownLeft:
+        return animation?.idleDownLeft;
+      case SimpleAnimationEnum.idleDownRight:
+        return animation?.idleDownRight;
+      case SimpleAnimationEnum.runUp:
+        return animation?.runUp;
+      case SimpleAnimationEnum.runRight:
+        return animation?.runRight;
+      case SimpleAnimationEnum.runDown:
+        return animation?.runDown;
+      case SimpleAnimationEnum.runLeft:
+        return animation?.runLeft;
+      case SimpleAnimationEnum.runUpLeft:
+        return animation?.runUpLeft;
+      case SimpleAnimationEnum.runUpRight:
+        return animation?.runUpRight;
+      case SimpleAnimationEnum.runDownLeft:
+        return animation?.runDownLeft;
+      case SimpleAnimationEnum.runDownRight:
+        return animation?.runDownRight;
+      case SimpleAnimationEnum.custom:
+        return animation?.idleLeft;
+      default:
+        return animation?.idleLeft;
+    }
+  }
+}
+
+/* extension TextConfigExtensions on TextConfig {
   TextStyle toTextStyle() {
     return TextStyle(
       color: this.color,
@@ -146,7 +182,7 @@ extension TextConfigExtensions on TextConfig {
       height: lineHeight,
     );
   }
-}
+} */
 
 // extension SpriteSheetExtensions on SpriteSheet {
 //   Animation createAnimation(int row,

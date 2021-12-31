@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:bonfire/bonfire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,55 +7,59 @@ import 'package:heist_squad_x/game/player/remote_player.dart';
 import 'bar_life_component.dart';
 
 class PlayerInterface extends GameInterface {
-  OverlayEntry _overlayEntryEmotes;
+  OverlayEntry? _overlayEntryEmotes;
   int countEnemy = 0;
   static int countEmotes = 10;
 
-  SpriteSheet spriteSheetEmotes = SpriteSheet(
-    imageName: 'emotes/emotes1.png',
-    textureWidth: 32,
-    textureHeight: 32,
-    columns: 8,
-    rows: countEmotes,
-  );
-
   @override
-  void resize(Size size) {
+  void onGameResize(Vector2 size) {
     add(
       InterfaceComponent(
-        sprite: Sprite('emote.png'),
-        width: 32.w,
-        height: 32.h,
+        sprite: Sprite.load('emote.png'),
+        width: 22.r,
+        height: 22.r,
         id: 1,
-        position: Position(size.width - 42.w, 10),
-        onTapComponent: () => _showDialog(),
+        position: Vector2(size.x - 32.w, 10),
+        onTapComponent: _showDialog,
       ),
     );
     addNicks(size);
     add(BarLifeComponent());
-    super.resize(size);
+    super.onGameResize(size);
   }
 
-  void addNicks(Size size) {
-    add(TextInterfaceComponent(
+  void addNicks(Vector2 size) {
+    add(
+      TextInterfaceComponent(
         text: _getEnemiesName(),
-        width: 32,
-        height: 32,
+        // width: 32,
+        // height: 32,
         id: 2,
-        position: Position(size.width - 60.w, 50),
-        textConfig: TextConfig(color: Colors.white, fontSize: 13),
-        onTapComponent: () => _showDialog()));
+        position: Vector2(size.x - 60.w, 50),
+        textConfig: TextStyle(color: Colors.white, fontSize: 13),
+        onTapComponent: _showDialog,
+      ),
+    );
   }
 
   @override
   void update(double t) {
-    if (gameRef.livingEnemies().length != countEnemy && gameRef.size != null) {
+    if (gameRef.livingEnemies().length != countEnemy) {
       addNicks(gameRef.size);
     }
     super.update(t);
   }
 
-  void _showDialog() {
+  Future<void> _showDialog(_) async {
+    final Sprite sprite =
+        await Sprite.load('emotes/emotes1.png', srcSize: Vector2.all(48.0));
+
+    SpriteSheet spriteSheetEmotes = SpriteSheet.fromColumnsAndRows(
+      image: sprite.image,
+      columns: 8,
+      rows: countEmotes,
+    );
+
     if (_overlayEntryEmotes == null) {
       _overlayEntryEmotes = OverlayEntry(
           builder: (context) => Align(
@@ -75,11 +77,11 @@ class PlayerInterface extends GameInterface {
                       children: List.generate(countEmotes, (index) {
                         return InkWell(
                           onTap: () {
-                            _overlayEntryEmotes.remove();
+                            _overlayEntryEmotes!.remove();
                             if (gameRef.player != null) {
                               (gameRef.player as GamePlayer)
                                   .showEmote(spriteSheetEmotes.createAnimation(
-                                index,
+                                row: index,
                                 stepTime: 0.1,
                               ));
                             }
@@ -88,10 +90,13 @@ class PlayerInterface extends GameInterface {
                             width: 32.w,
                             height: 32.h,
                             margin: EdgeInsets.only(left: 20),
-                            child: Flame.util.animationAsWidget(
-                                Position(32, 32),
-                                spriteSheetEmotes.createAnimation(index,
-                                    stepTime: 0.1)),
+                            child: SpriteAnimationWidget(
+                              // Vector2(32, 32),
+                              animation: spriteSheetEmotes.createAnimation(
+                                row: index,
+                                stepTime: 0.1,
+                              ),
+                            ),
                           ),
                         );
                       }),
@@ -141,7 +146,7 @@ class PlayerInterface extends GameInterface {
       //   ),
       // ));
     }
-    Overlay.of(gameRef.context).insert(_overlayEntryEmotes);
+    Overlay.of(gameRef.context)!.insert(_overlayEntryEmotes!);
   }
 
   String _getEnemiesName() {

@@ -66,10 +66,10 @@ class RegisterView extends GetView<RegisterController> {
             return Obx(
               () => RadioListTile<Weapon>(
                 title: Text(
-                    Weapon.values[index].toString().split(".")[1].capitalize),
+                    Weapon.values[index].toString().split(".")[1].capitalize!),
                 value: Weapon.values[index],
                 groupValue: controller.selectedWeapon,
-                onChanged: (weapon) => controller.selectedWeapon = weapon,
+                onChanged: (weapon) => controller.selectedWeapon = weapon!,
                 selectedTileColor: Palette.BACKGROUND_LIGHT,
                 selected: controller.selectedWeapon == Weapon.values[index],
                 shape: RoundedRectangleBorder(
@@ -83,16 +83,12 @@ class RegisterView extends GetView<RegisterController> {
                     switch (Weapon.values[index]) {
                       case Weapon.crowbar:
                         return Icon(Icons.create);
-                        break;
                       case Weapon.computer:
                         return Icon(Icons.cached);
-                        break;
                       case Weapon.hammer:
                         return Icon(Icons.hail);
-                        break;
                       case Weapon.knife:
                         return Icon(Icons.keyboard);
-                        break;
                       default:
                         return Icon(Icons.bolt);
                     }
@@ -111,21 +107,21 @@ class RegisterView extends GetView<RegisterController> {
             Expanded(child: SizedBox()),
             ElevatedButton(
               onPressed: () {
-                final FormState formState =
-                    controller.registerFormKey.currentState;
-                if (formState.validate()) {
+                final formState = controller.registerFormKey.currentState;
+                if (formState!.validate()) {
                   UserModel user = UserModel(
                     email: controller.emailController.text,
                     nick: controller.nicknameController.text,
                     weapon: controller.selectedWeapon
                         .toString()
                         .split(".")[1]
-                        .capitalize,
+                        .capitalize!,
                     active: false,
                     skinId: 0,
                   );
 
-                  Auth.createAccount(user, controller.passwordController.text);
+                  Auth.i
+                      .createAccount(user, controller.passwordController.text);
                 }
               },
               child: Text('CREATE'),

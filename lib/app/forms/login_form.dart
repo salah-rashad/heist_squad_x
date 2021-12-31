@@ -34,7 +34,7 @@ class LoginForm extends GetWidget<LoginController> {
             enableSuggestions: true,
             style: TextStyle(fontSize: 20),
             validator: (value) {
-              if (value.isEmpty) {
+              if (value!.isEmpty) {
                 return 'Email is empty.';
               } else
                 return null;
@@ -57,7 +57,7 @@ class LoginForm extends GetWidget<LoginController> {
             obscureText: true,
             style: TextStyle(fontSize: 20),
             validator: (value) {
-              if (value.isEmpty) {
+              if (value!.isEmpty) {
                 return 'Password is empty.';
               } else
                 return null;
@@ -71,8 +71,6 @@ class LoginForm extends GetWidget<LoginController> {
             children: [
               FlatButtonX(
                 onPressed: () {},
-                highlightColor: Colors.transparent,
-                splashColor: Palette.BACKGROUND_LIGHT,
                 child: Text(
                   "reset password".toUpperCase(),
                   style: TextStyle(
@@ -83,11 +81,10 @@ class LoginForm extends GetWidget<LoginController> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    final FormState formState =
-                        controller.loginFormKey.currentState;
-                    if (formState.validate()) {
+                    var formState = controller.loginFormKey.currentState;
+                    if (formState!.validate()) {
                       formState.save();
-                      Auth.loginUser(
+                      Auth.i.loginUser(
                         controller.emailController.text,
                         controller.passwordController.text,
                       );

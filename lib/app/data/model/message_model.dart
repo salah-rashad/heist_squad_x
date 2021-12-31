@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 class Message {
-  String roomId;
-  String nickname;
-  String message;
+  String? roomId;
+  String? nickname;
+  String? message;
   Message({
     this.roomId,
     this.nickname,
@@ -11,14 +11,14 @@ class Message {
   });
 
   Message copyWith({
-    String roomId,
-    String username,
-    String message,
+    String? roomId,
+    String? username,
+    String? message,
   }) {
     return Message(
-      roomId: roomId ?? this.roomId,
-      nickname: username ?? this.nickname,
-      message: message ?? this.message,
+      roomId: roomId,
+      nickname: username,
+      message: message,
     );
   }
 
@@ -31,7 +31,6 @@ class Message {
   }
 
   factory Message.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
 
     return Message(
       roomId: map['roomId'],

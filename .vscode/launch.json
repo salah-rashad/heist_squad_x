@@ -4,13 +4,13 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+    
         {
-<<<<<<< HEAD
             "name": "Mobile (wifi)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "deviceId": "192.168.1.6:5555"
+            "deviceId": "192.168.1.4:5555"
         },
         {
             "name": "Mobile (usb)",
@@ -18,18 +18,11 @@
             "type": "dart",
             "program": "lib/main.dart",
             "deviceId": "70a2c406"
-=======
-            "name": "Mobile",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
->>>>>>> 1d0a6f2f738a8daa26e18f9295cd9adc1e0f379e
         },
         {
             "name": "Windows",
             "request": "launch",
             "type": "dart",
-<<<<<<< HEAD
             "program": "lib/main.dart",
             "deviceId": "windows"
         },
@@ -46,15 +39,6 @@
             "type": "dart",
             "program": "lib/main.dart",
             "deviceId": "edge"
-=======
-            "program": "lib/main.dart"
-        },
-        {
-            "name": "Web",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart"
->>>>>>> 1d0a6f2f738a8daa26e18f9295cd9adc1e0f379e
         }
     ]
 }

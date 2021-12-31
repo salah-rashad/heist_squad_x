@@ -16,21 +16,10 @@ class AppPages {
 
   static final routes = [
     GetPage(
-      name: Routes.HOME,
-      page: () => HomeView(),
-      binding: HomeBinding(),
-      transition: Transition.topLevel,
-    ),
-    GetPage(
       name: Routes.SPLASH_SCREEN,
       page: () => SplashScreenView(),
       binding: SplashScreenBinding(),
     ),
-    // GetPage(
-    //   name: Routes.PERSON_SELECT,
-    //   page: () => PersonSelectView(),
-    //   binding: PersonSelectBinding(),
-    // ),
     GetPage(
       name: Routes.LOGIN,
       page: () => LoginView(),
@@ -40,6 +29,12 @@ class AppPages {
       name: Routes.REGISTER,
       page: () => RegisterView(),
       binding: RegisterBinding(),
+    ),
+    GetPage(
+      name: Routes.HOME,
+      page: () => HomeView(),
+      binding: HomeBinding(),
+      transition: Transition.topLevel,
     ),
     GetPage(
       name: Routes.JOIN_ROOM,

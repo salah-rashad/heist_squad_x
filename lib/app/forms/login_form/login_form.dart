@@ -33,7 +33,7 @@ class LoginForm extends GetWidget<LoginController> {
             enableSuggestions: true,
             style: TextStyle(fontSize: 20),
             validator: (value) {
-              if (!value.isEmail) {
+              if (!value!.isEmail) {
                 return 'Email is invalid.';
               } else
                 return null;
@@ -56,7 +56,7 @@ class LoginForm extends GetWidget<LoginController> {
             obscureText: true,
             style: TextStyle(fontSize: 20),
             validator: (value) {
-              if (value.isEmpty) {
+              if (value!.isEmpty) {
                 return 'Password is empty.';
               } else if (value.length < 8) {
                 return 'Password must be at least 8 characters long.';
@@ -72,8 +72,7 @@ class LoginForm extends GetWidget<LoginController> {
             children: [
               FlatButtonX(
                 onPressed: () {},
-                highlightColor: Colors.transparent,
-                splashColor: Palette.BACKGROUND_LIGHT,
+                
                 child: Text(
                   "CREATE A NEW ACCOUNT",
                   style: TextStyle(
@@ -84,8 +83,8 @@ class LoginForm extends GetWidget<LoginController> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  final FormState formState = controller.loginFormKey.currentState;
-                  if (formState.validate()) {
+                  final formState = controller.loginFormKey.currentState;
+                  if (formState!.validate()) {
                     // Login User
                   }
                 },

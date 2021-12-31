@@ -34,7 +34,7 @@ class RegisterForm extends GetWidget<RegisterController> {
             enableSuggestions: true,
             style: TextStyle(fontSize: 20),
             validator: (value) {
-              if (!GetUtils.isUsername(value)) {
+              if (!GetUtils.isUsername(value!)) {
                 return 'Nickname is invalid.';
               } else
                 return null;
@@ -63,7 +63,7 @@ class RegisterForm extends GetWidget<RegisterController> {
             enableSuggestions: true,
             style: TextStyle(fontSize: 20),
             validator: (value) {
-              if (!value.isEmail) {
+              if (!value!.isEmail) {
                 return 'Email is invalid.';
               } else
                 return null;
@@ -86,7 +86,7 @@ class RegisterForm extends GetWidget<RegisterController> {
             obscureText: true,
             style: TextStyle(fontSize: 20),
             validator: (value) {
-              if (value.isEmpty) {
+              if (value!.isEmpty) {
                 return 'Password is empty.';
               } else if (value.length < 8) {
                 return 'Password must be at least 8 characters long.';

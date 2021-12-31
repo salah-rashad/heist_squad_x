@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/data/model/room_model.dart';
 import 'package:heist_squad_x/app/data/provider/database.dart';
 import 'package:heist_squad_x/app/modules/room/room_view.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:heist_squad_x/app/util/futured.dart';
 
 class JoinRoomView extends StatelessWidget {
   @override
@@ -20,9 +21,16 @@ class JoinRoomView extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                child: Text(
-                  "JOIN ROOM",
-                  style: TextStyle(fontSize: 22.0.sp),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "JOIN ROOM",
+                      style: TextStyle(fontSize: 22.0),
+                    ),
+                    IconButton(
+                        onPressed: () {}, icon: Icon(Icons.refresh_rounded))
+                  ],
                 ),
                 alignment: Alignment.centerLeft,
                 padding: EdgeInsets.only(bottom: 32.0),
@@ -35,7 +43,7 @@ class JoinRoomView extends StatelessWidget {
                       "ROOM NAME",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 12.0.sp,
+                        fontSize: 12.0,
                         color: Palette.WHITE24,
                       ),
                     ),
@@ -45,7 +53,7 @@ class JoinRoomView extends StatelessWidget {
                       "OWNER",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 12.0.sp,
+                        fontSize: 12.0,
                         color: Palette.WHITE24,
                       ),
                     ),
@@ -55,7 +63,7 @@ class JoinRoomView extends StatelessWidget {
                       "NO. OF PLAYERS",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 12.0.sp,
+                        fontSize: 12.0,
                         color: Palette.WHITE24,
                       ),
                     ),
@@ -63,97 +71,82 @@ class JoinRoomView extends StatelessWidget {
                 ],
               ),
               SizedBox(
-                height: 16.0.h,
+                height: 16.0,
               ),
               Expanded(
-                child: FutureBuilder<List<Room>>(
+                child: Futured<List<Room>?>(
                   future: Database.getRooms(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.hasData) {
-                        List<Room> rooms = snapshot.data;
+                  hasData: (context, snapshot) {
+                    List<Room> rooms = snapshot.data!;
 
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: rooms.length ?? 0,
-                          separatorBuilder: (BuildContext context, int index) {
-                            return SizedBox(
-                              height: 8.0.h,
-                            );
-                          },
-                          padding: EdgeInsets.symmetric(vertical: 16.0),
-                          itemBuilder: (BuildContext context, int index) {
-                            Room room = rooms[index];
-                            return Stack(
-                              children: [
-                                InkWell(
-                                  onTap: () {},
-                                  child: TextButton(
-                                    onPressed: () => Get.to(
-                                      () => RoomView(room),
-                                      transition: Transition.fade,
-                                      preventDuplicates: true,
-                                    ),
-                                    style: TextButton.styleFrom(
-                                      minimumSize: Size(
-                                        double.maxFinite,
-                                        56.0.h,
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: rooms.length,
+                      separatorBuilder: (BuildContext context, int index) {
+                        return SizedBox(
+                          height: 8.0,
+                        );
+                      },
+                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      itemBuilder: (BuildContext context, int index) {
+                        Room room = rooms[index];
+                        return Material(
+                          type: MaterialType.button,
+                          color: Palette.BACKGROUND_LIGHT,
+                          clipBehavior: Clip.antiAlias,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4.0)),
+                          child: InkWell(
+                            onTap: () => Get.to(
+                              () => RoomView(room),
+                              transition: Transition.fade,
+                              preventDuplicates: true,
+                            ),
+                            child: SizedBox(
+                              height: 56.0,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        room.name!,
+                                        textAlign: TextAlign.center,
                                       ),
-                                      backgroundColor: Palette.BACKGROUND_LIGHT,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              room.name,
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              room.ownerId,
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              "${room.players.length}/${room.maxPlayers}",
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
                                     ),
                                   ),
-                                ),
-                                // Positioned.fill(
-                                //     child: InkWell(
-                                //   onTap: () {},
-                                // )),
-                              ],
-                            );
-                          },
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        room.ownerName ??
+                                            room.ownerId ??
+                                            "UnKnown",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "${room.players!.length}/${room.maxPlayers}",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         );
-                      } else if (!snapshot.hasData)
-                        return Text("No rooms found!");
-                      else if (snapshot.hasError)
-                        return Text("Error: ${snapshot.error}");
-                      else
-                        return Center(child: CircularProgressIndicator());
-                    } else
-                      return Center(child: CircularProgressIndicator());
+                      },
+                    );
+                  },
+                  hasNoData: (context, snapshot) {
+                    return Center(child: Text("No rooms found!"));
                   },
                 ),
               ),

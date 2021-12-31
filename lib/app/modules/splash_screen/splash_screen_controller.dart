@@ -1,20 +1,16 @@
 import 'package:flame_splash_screen/flame_splash_screen.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:heist_squad_x/main.dart';
 
 class SplashScreenController extends GetxController {
-  FlameSplashController splashController;
-
-  bool isPlaying = false;
-
-  RxDouble paddingTop = MediaQuery.of(Get.context).viewPadding.top.obs;
+  late FlameSplashController splashController;
 
   @override
   void onInit() {
     splashController = FlameSplashController(
-      fadeInDuration: Duration(milliseconds: 750),
-      fadeOutDuration: Duration(milliseconds: 450),
-      waitDuration: Duration(seconds: 0),
+      fadeInDuration: 750.milliseconds,
+      fadeOutDuration: 450.milliseconds,
+      waitDuration: 2.seconds,
       autoStart: true,
     );
 
@@ -24,6 +20,7 @@ class SplashScreenController extends GetxController {
   @override
   void onClose() {
     splashController.dispose();
+    isSplash.value = false;
     super.onClose();
   }
 }

@@ -1,19 +1,18 @@
 import 'package:bonfire/bonfire.dart';
 
 class SpriteSheetHero {
-  static SpriteSheet _create(String path) {
-    return SpriteSheet(
-      imageName: path,
-      textureWidth: 32,
-      textureHeight: 32,
+  static Future<SpriteSheet> _create(String path) async {
+    final Sprite sprite = await Sprite.load(path, srcSize: Vector2.all(32.0));
+    return SpriteSheet.fromColumnsAndRows(
+      image: sprite.image,
       columns: 3,
       rows: 8,
     );
   }
 
-  static SpriteSheet get hero1 => _create('heroes/hero1.png');
-  static SpriteSheet get hero2 => _create('heroes/hero2.png');
-  static SpriteSheet get hero3 => _create('heroes/hero3.png');
-  static SpriteSheet get hero4 => _create('heroes/hero4.png');
-  static SpriteSheet get hero5 => _create('heroes/hero5.png');
+  static Future<SpriteSheet>  hero1() async => _create('heroes/hero1.png');
+  static Future<SpriteSheet>  hero2() async => _create('heroes/hero2.png');
+  static Future<SpriteSheet>  hero3() async => _create('heroes/hero3.png');
+  static Future<SpriteSheet>  hero4() async => _create('heroes/hero4.png');
+  static Future<SpriteSheet>  hero5()async => _create('heroes/hero5.png');
 }

@@ -1,87 +1,76 @@
 import 'dart:ui';
 
 import 'package:bonfire/bonfire.dart';
-import 'package:bonfire/util/direction.dart';
-import 'package:flame/animation.dart';
 import 'package:heist_squad_x/game/objects/breakable.dart';
 import 'package:heist_squad_x/game/utils/AxisD.dart';
 import 'package:heist_squad_x/game/utils/LootableType.dart';
 import 'package:heist_squad_x/game/utils/Weapon.dart';
 import 'package:heist_squad_x/game/utils/game_extensions.dart';
-import 'package:heist_squad_x/main.dart';
 
 class WoodenDoor extends Destroyable {
-  final Direction direction;
-  final AxisD axisD;
-  final Position initPosition;
-  double breakTime;
-  final double height;
-  final double width;
+  double? breakTime;
   final Size hCollSize;
   final Size vCollSize;
 
   static const JSON_NAME = "wooden_door";
 
   WoodenDoor({
-    this.direction,
-    this.axisD,
-    this.initPosition,
+    Vector2? initPosition,
+    AxisD? axisD,
     this.breakTime,
-    this.height = tileSize,
-    this.width = tileSize,
-    this.hCollSize,
-    this.vCollSize,
+    double? height,
+    double? width,
+    required this.hCollSize,
+    required this.vCollSize,
   }) : super(
-            SimpleDirectionAnimation(
-              idleLeft: _vertical,
-              idleRight: _vertical,
-              idleBottom: _horizontal,
-              idleTop: _horizontal,
-              //
-              runLeft: _vertical,
-              runRight: _vertical,
-              runBottom: _horizontal,
-              runTop: _horizontal,
-              //
-            ),
-            Sprite("tiled/tiles/indoor/wooden_door_${axisD.getName()}_o.png"),
-            direction: direction,
-            height: height,
-            width: width,
-            initPosition: initPosition,
-            axisD: axisD,
-            collision: generateFitCollision(
-              direction,
-              axisD,
-              height,
-              width,
-              LType.door,
-              hCollSize: hCollSize,
-              vCollSize: vCollSize,
-            ),
-            life: breakTime,
-            itemName: "Wooden Door",
-            type: LType.door,
-            canDestroyWeapons: [
-              WeaponKey.hammer,
-              WeaponKey.saw,
-              WeaponKey.crowbar,
-              WeaponKey.keys,
-              WeaponKey.smallBomb,
-              WeaponKey.largeBomb,
-            ]);
+          SimpleDirectionAnimation(
+            idleLeft: _vertical,
+            idleRight: _vertical,
+            idleDown: _horizontal,
+            idleUp: _horizontal,
+            //
+            runLeft: _vertical,
+            runRight: _vertical,
+            runDown: _horizontal,
+            runUp: _horizontal,
+            //
+          ),
+          Sprite.load(
+              "tiled/tiles/indoor/wooden_door_${axisD?.getName()}_o.png"),
+          height: height,
+          width: width,
+          initPosition: initPosition!,
+          axisD: axisD,
+          life: breakTime!,
+          itemName: "Wooden Door",
+          type: LType.door,
+          canDestroyWeapons: [
+            WeaponKey.hammer,
+            WeaponKey.saw,
+            WeaponKey.crowbar,
+            WeaponKey.keys,
+            WeaponKey.smallBomb,
+            WeaponKey.largeBomb,
+          ],
+          hCollSize: hCollSize,
+          vCollSize: vCollSize,
+        );
 
-  static Animation get _horizontal => Animation.sequenced(
+  static Future<SpriteAnimation> get _horizontal => SpriteAnimation.load(
         "tiled/tiles/indoor/wooden_door_h.png",
-        1,
-        textureHeight: 48.0,
-        textureWidth: 48.0,
+        SpriteAnimationData.sequenced(
+          amount: 1,
+          textureSize: Vector2.all(48.0),
+          stepTime: 0.1,
+        ),
       );
 
-  static Animation get _vertical => Animation.sequenced(
+  static Future<SpriteAnimation> get _vertical => SpriteAnimation.load(
         "tiled/tiles/indoor/wooden_door_v.png",
-        1,
-        textureHeight: 48.0,
-        textureWidth: 48.0,
+        SpriteAnimationData.sequenced(
+          amount: 1,
+          textureSize: Vector2.all(48.0),
+          stepTime: 0.1,
+        ),
       );
 }

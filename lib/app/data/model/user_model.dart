@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:heist_squad_x/game/player/game_player.dart';
 
 class UserModel {
-  GamePlayer player;
-  String uid, nick, email, weapon;
-  int skinId;
-  bool active;
+  GamePlayer? player;
+  String? uid, nick, email, weapon;
+  int? skinId;
+  bool? active;
 
   UserModel({
     this.uid,
@@ -16,16 +16,17 @@ class UserModel {
     this.active,
   });
 
-  UserModel.fromSnapshot(DocumentSnapshot data) {
-    this.uid = data.id;
-    this.nick = data['nick'];
-    this.email = data['email'];
-    this.weapon = data['weapon'];
-    this.skinId = data['skinId'];
-    this.active = data['active'];
+  UserModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>>? doc) {
+    final data = doc!.data()!;
+    uid = doc.id;
+    nick = data['nick'];
+    email = data['email'];
+    weapon = data['weapon'];
+    skinId = data['skinId'];
+    active = data['active'];
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
 
     data["uid"] = uid;

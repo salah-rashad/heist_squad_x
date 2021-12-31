@@ -4,12 +4,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';
 
-
-
 extension INPUT_ONTAP on TextField {
   Widget fullScreen(
     BuildContext context, {
-    Function(String text) onDone,
+    Function(String text)? onDone,
     String buttonText = "Done",
   }) {
     return Stack(
@@ -22,10 +20,10 @@ extension INPUT_ONTAP on TextField {
             onTap: () => Get.dialog(
                 _dialog(
                   // context,
-                  this.controller,
-                  onDone,
+                  this.controller!,
+                  onDone!,
                   buttonText,
-                  this.decoration.hintText,
+                  this.decoration!.hintText!,
                 ),
                 useSafeArea: false,
                 barrierDismissible: true,
@@ -52,25 +50,24 @@ Widget _dialog(
           backgroundColor: Palette.BACKGROUND_LIGHT,
           body: Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 40.0, vertical: 8.0),
+                const EdgeInsets.symmetric(horizontal: 40.0, vertical: 32.0),
             child: Row(
               children: [
                 Expanded(
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: AutoDirection(
-                      text: text,
-                      child: TextField(
-                        controller: controller,
-                        autofocus: true,
-                        maxLines: null,
-                        maxLength: 255,
-                        keyboardType: TextInputType.multiline,
-                        decoration: InputDecoration(hintText: hintText),
-                        onChanged: (value) => setState(() {
-                          text = value;
-                        }),
-                      ),
+                  child: AutoDirection(
+                    text: text,
+                    child: TextField(
+                      controller: controller,
+                      autofocus: true,
+                      maxLines: null,
+                      expands: true,
+                      textAlignVertical: TextAlignVertical.top,
+                      maxLength: 255,
+                      keyboardType: TextInputType.multiline,
+                      decoration: InputDecoration(hintText: hintText),
+                      onChanged: (value) => setState(() {
+                        text = value;
+                      }),
                     ),
                   ),
                 ),
@@ -87,10 +84,11 @@ Widget _dialog(
                     ElevatedButton.icon(
                       icon: Icon(Icons.send_rounded),
                       onPressed: () {
-                        if (controller.text.length > 255)
-                          return Fluttertoast.showToast(
+                        if (controller.text.length > 255) {
+                          Fluttertoast.showToast(
                               msg:
                                   "Message must be no longer than 255 characters.");
+                        }
                         Get.back();
                         try {
                           onDone(controller.text);
@@ -112,11 +110,12 @@ Widget _dialog(
       },
     );
 
-
 extension StringExtensions on String {
   Size getSize(TextStyle style) {
     final TextPainter textPainter = TextPainter(
-        text: TextSpan(text: this, style: style), maxLines: 1, textDirection: TextDirection.ltr)
+        text: TextSpan(text: this, style: style),
+        maxLines: 1,
+        textDirection: TextDirection.ltr)
       ..layout(minWidth: 0, maxWidth: double.infinity);
     return textPainter.size;
   }

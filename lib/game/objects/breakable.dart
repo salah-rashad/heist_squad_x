@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:ui';
 
-import 'package:bonfire/bonfire.dart';
-import 'package:bonfire/util/collision/object_collision.dart';
-import 'package:flame/animation.dart' as FlameAnimation;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:bonfire/bonfire.dart' hide Timer;
+import 'package:bonfire/tiled/model/tiled_object_properties.dart';
+import 'package:flutter/material.dart' hide Animation;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
@@ -23,91 +20,107 @@ import 'package:heist_squad_x/main.dart';
 class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
   bool isClose = false;
 
-  Timer destroyTimer;
+  Timer? destroyTimer;
 
   bool isBeingDestroyed = false;
 
-  int currentGain;
-  final int maxGain;
+  int? currentGain;
+  final int? maxGain;
 
-  Position initPosition;
-  final double height;
-  final double width;
+  Vector2 initPosition;
   final SimpleDirectionAnimation animation;
-  final Sprite destroyedSprite;
-  final CollisionArea collision;
-  final List<WeaponKey> canDestroyWeapons;
+  final Future<Sprite>? destroyedSprite;
+  final List<WeaponKey>? canDestroyWeapons;
 
-  final Direction direction;
-  final AxisD axisD;
-  final String itemName;
-  final LType type;
+  final Direction? direction;
+  final AxisD? axisD;
+  final String? itemName;
+  final LType? type;
+
+  final Size hCollSize;
+  final Size vCollSize;
+
+  List<CollisionArea>? get collisions => collisionConfig?.collisions.toList();
 
   Destroyable(
     this.animation,
     this.destroyedSprite, {
-    this.height = tileSize,
-    this.width = tileSize,
+    double? height,
+    double? width,
     double life = 100,
     this.maxGain = 0,
-    this.collision,
-    @required this.direction,
-    @required this.axisD,
+    this.direction,
+    this.axisD,
     this.itemName,
     this.canDestroyWeapons,
     this.type = LType.normal,
-    this.initPosition,
+    required this.initPosition,
+    required this.hCollSize,
+    required this.vCollSize,
   }) : super(
-          initPosition: initPosition.minus(Position(0, tileSize.r)),
-          height: height.r,
-          width: width.r,
+          position: initPosition..sub(Vector2(0, tileSizeResponsive)),
+          height: height ?? tileSizeResponsive,
+          width: width ?? tileSizeResponsive,
           life: life,
-          speed: tileSize.r,
-          initDirection: direction,
+          speed: tileSize,
+          initDirection: direction!,
           animation: animation,
         ) {
     setupCollision(
       CollisionConfig(
         collisions: [
-          collision,
+          generateFitCollision(
+            direction!,
+            axisD!,
+            height ?? tileSizeResponsive,
+            width ?? tileSizeResponsive,
+            type!,
+            hCollSize: hCollSize,
+            vCollSize: vCollSize,
+          ),
         ],
       ),
     );
 
     switch (axisD) {
       case AxisD.v:
-        this.animation.current = this.animation.idleRight;
+        animation.play(SimpleAnimationEnum.idleRight);
         break;
       case AxisD.h:
-        this.animation.current = this.animation.idleTop;
+        animation.play(SimpleAnimationEnum.idleUp);
         break;
+      default:
+        animation.play(SimpleAnimationEnum.idleRight);
     }
 
     switch (direction) {
       case Direction.left:
-        this.animation.current = this.animation.idleLeft;
+        animation.playOnce(animation.idleLeft!.asFuture());
         break;
       case Direction.right:
-        this.animation.current = this.animation.idleRight;
+        animation.playOnce(animation.idleRight!.asFuture());
         break;
-      case Direction.top:
-        this.animation.current = this.animation.idleTop;
+      case Direction.up:
+        animation.playOnce(animation.idleUp!.asFuture());
         break;
-      case Direction.bottom:
-        this.animation.current = this.animation.idleBottom;
+      case Direction.down:
+        animation.playOnce(animation.idleDown!.asFuture());
         break;
-      case Direction.topLeft:
-        this.animation.current = this.animation.idleTopLeft;
+      case Direction.upLeft:
+        animation.playOnce(animation.idleUpLeft!.asFuture());
         break;
-      case Direction.topRight:
-        this.animation.current = this.animation.idleTopRight;
+      case Direction.upRight:
+        animation.playOnce(animation.idleUpRight!.asFuture());
         break;
-      case Direction.bottomLeft:
-        this.animation.current = this.animation.idleBottomLeft;
+      case Direction.downLeft:
+        animation.playOnce(animation.idleDownLeft!.asFuture());
         break;
-      case Direction.bottomRight:
-        this.animation.current = this.animation.idleBottomRight;
+      case Direction.downRight:
+        animation.playOnce(animation.idleDownRight!.asFuture());
         break;
+
+      default:
+        animation.playOnce(animation.idleLeft!.asFuture());
     }
   }
 
@@ -126,12 +139,13 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
 
   @override
   void render(Canvas canvas) {
-    if (this.isVisibleInCamera() && isClose) {
+    if (isVisible && isClose) {
       drawLifeBar(
         canvas,
         strokeWidth: 4,
       );
     }
+
     super.render(canvas);
   }
 
@@ -145,7 +159,6 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
     padding = padding.r;
     strokeWidth = strokeWidth.r;
 
-    if (this.position == null) return;
     double yPosition = rectCollision.top - padding;
 
     if (drawInBottom) {
@@ -153,7 +166,7 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
     }
 
     if (autoPosition) {
-      if (this.directionThatPlayerIs() == Direction.top)
+      if (this.directionThePlayerIsIn() == Direction.up)
         yPosition = rectCollision.bottom + padding;
       else
         yPosition = rectCollision.top - padding;
@@ -196,10 +209,10 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
     if (!isDead) {
       showDamage(
         1,
-        config: TextConfig(
+        config: TextStyle(
           fontSize: 22.0.sp,
           color: Palette.RED,
-          fontFamily: AppTheme.appTheme.textTheme.bodyText1.fontFamily,
+          fontFamily: AppTheme.appTheme.textTheme.bodyText1!.fontFamily,
         ),
         // onlyUp: true,
         gravity: 0.3,
@@ -218,61 +231,66 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
   void die() {
     gameRef.add(
       AnimatedObjectOnce(
-        animation: FlameAnimation.Animation.sequenced(
+        animation: SpriteAnimation.load(
           "smoke_explosin.png",
-          6,
-          textureWidth: this.width,
-          textureHeight: this.height,
+          SpriteAnimationData.sequenced(
+            amount: 6,
+            stepTime: 0.1,
+            textureSize: this.vectorPosition,
+          ),
         ),
         position: position,
       ),
     );
-    gameRef.addGameComponent(
-      GameDecorationWithCollision(
-        this.destroyedSprite,
+
+    gameRef.add(
+      GameDecorationWithCollision.withSprite(
+        destroyedSprite!,
         initPosition,
         height: this.height,
         width: this.width,
-        collisions: [type == LType.door ? null : collision],
+        collisions: type == LType.door ? null : collisions,
       ),
     );
 
     if (type == LType.normal) {
-      gameRef.addGameComponent(
+      gameRef.add(
         Lootable(
           maxGain,
           width: this.width,
           height: this.height,
-          collision: this.collision,
+          collision: this.collisions![0],
           initPosition: this.initPosition,
           direction: this.direction,
           axisD: this.axisD,
+          vCollSize: vCollSize,
+          hCollSize: hCollSize,
         ),
       );
     }
-    remove();
+    remove(this);
     super.die();
   }
 
   @override
   void onTap() {
     if (isClose) {
-      GamePlayer player = gameRef.player;
+      GamePlayer? player = gameRef.player as GamePlayer?;
 
-      _showDialogLootable(this, player);
+      _showDialogLootable(this, player!);
 
       switch (axisD) {
         case AxisD.h:
-          if (directionThatPlayerIs() == Direction.top) {
-            if (player.lastDirection == Direction.bottom) return;
+          if (directionThePlayerIsIn() == Direction.up) {
+            if (player.lastDirection == Direction.down) return;
 
             player.joystickChangeDirectional(
               JoystickDirectionalEvent(
                   directional: JoystickMoveDirectional.MOVE_DOWN),
             );
           }
-          if (directionThatPlayerIs() == Direction.bottom) {
-            if (player.lastDirection == Direction.top) return;
+          if (directionThePlayerIsIn() == Direction.down) {
+            if (player.lastDirection == Direction.up) return;
 
             player.joystickChangeDirectional(
               JoystickDirectionalEvent(
@@ -280,15 +298,15 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
             );
           }
           break;
-        case AxisD.v:
-          if (directionThatPlayerIs() == Direction.right) {
+        default:
+          if (directionThePlayerIsIn() == Direction.right) {
             if (player.lastDirection == Direction.left) return;
             player.joystickChangeDirectional(
               JoystickDirectionalEvent(
                   directional: JoystickMoveDirectional.MOVE_DOWN),
             );
           }
-          if (directionThatPlayerIs() == Direction.left) {
+          if (directionThePlayerIsIn() == Direction.left) {
             if (player.lastDirection == Direction.right) return;
             player.joystickChangeDirectional(
               JoystickDirectionalEvent(
@@ -301,33 +319,33 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
       if (player.lastDirection == direction) return;
 
       switch (direction) {
-        case Direction.left:
-          if (directionThatPlayerIs() == Direction.right)
-            player.joystickChangeDirectional(JoystickDirectionalEvent(
-                directional: JoystickMoveDirectional.MOVE_LEFT));
-          break;
         case Direction.right:
-          if (directionThatPlayerIs() == Direction.left)
+          if (directionThePlayerIsIn() == Direction.left)
             player.joystickChangeDirectional(JoystickDirectionalEvent(
                 directional: JoystickMoveDirectional.MOVE_RIGHT));
           break;
-        case Direction.top:
-          if (directionThatPlayerIs() == Direction.bottom)
+        case Direction.up:
+          if (directionThePlayerIsIn() == Direction.down)
             player.joystickChangeDirectional(JoystickDirectionalEvent(
                 directional: JoystickMoveDirectional.MOVE_UP));
           break;
-        case Direction.bottom:
-          if (directionThatPlayerIs() == Direction.top)
+        case Direction.down:
+          if (directionThePlayerIsIn() == Direction.up)
             player.joystickChangeDirectional(JoystickDirectionalEvent(
                 directional: JoystickMoveDirectional.MOVE_DOWN));
           break;
-        case Direction.topLeft:
+        case Direction.upLeft:
           break;
-        case Direction.topRight:
+        case Direction.upRight:
           break;
-        case Direction.bottomLeft:
+        case Direction.downLeft:
           break;
-        case Direction.bottomRight:
+        case Direction.downRight:
+          break;
+        default:
+          if (directionThePlayerIsIn() == Direction.right)
+            player.joystickChangeDirectional(JoystickDirectionalEvent(
+                directional: JoystickMoveDirectional.MOVE_LEFT));
           break;
       }
 
@@ -339,11 +357,11 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
   }
 
   void playerSight({
-    Function(Player) onSight,
-    Function() notOnSight,
+    Function(Player)? onSight,
+    Function()? notOnSight,
   }) {
-    GamePlayer player = gameRef.player;
-    if (player == null || this.position == null) return;
+    GamePlayer? player = gameRef.player as GamePlayer?;
+    if (player == null) return;
 
     if (player.isDead) {
       if (notOnSight != null) notOnSight();
@@ -354,50 +372,50 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
       if (onSight != null) onSight(player);
     }
 
-    if (player.isCloseTo(this.rectCollision)) {
+    if (player.isCloseTo(this.collisions![0].rect)) {
       switch (axisD) {
         case AxisD.h:
-          if (directionThatPlayerIs() == Direction.top ||
-              directionThatPlayerIs() == Direction.bottom) {
+          if (directionThePlayerIsIn() == Direction.up ||
+              directionThePlayerIsIn() == Direction.down) {
             checkOnSight();
           }
           break;
-        case AxisD.v:
-          if (directionThatPlayerIs() == Direction.right ||
-              directionThatPlayerIs() == Direction.left) {
+        default:
+          if (directionThePlayerIsIn() == Direction.right ||
+              directionThePlayerIsIn() == Direction.left) {
             checkOnSight();
           }
           break;
       }
 
       switch (direction) {
-        case Direction.left:
-          if (directionThatPlayerIs() == Direction.right) {
-            checkOnSight();
-          }
-          break;
         case Direction.right:
-          if (directionThatPlayerIs() == Direction.left) {
+          if (directionThePlayerIsIn() == Direction.left) {
             checkOnSight();
           }
           break;
-        case Direction.top:
-          if (directionThatPlayerIs() == Direction.bottom) {
+        case Direction.up:
+          if (directionThePlayerIsIn() == Direction.down) {
             checkOnSight();
           }
           break;
-        case Direction.bottom:
-          if (directionThatPlayerIs() == Direction.top) {
+        case Direction.down:
+          if (directionThePlayerIsIn() == Direction.up) {
             checkOnSight();
           }
           break;
-        case Direction.topLeft:
+        case Direction.upLeft:
           break;
-        case Direction.topRight:
+        case Direction.upRight:
           break;
-        case Direction.bottomLeft:
+        case Direction.downLeft:
           break;
-        case Direction.bottomRight:
+        case Direction.downRight:
+          break;
+        default:
+          if (directionThePlayerIsIn() == Direction.right) {
+            checkOnSight();
+          }
           break;
       }
     } else {
@@ -407,7 +425,7 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
 
   void showDamage(
     double amount, {
-    TextConfig config,
+    TextStyle? config,
     double initVelocityTop = -5,
     double gravity = 0.5,
     double maxDownSize = 20,
@@ -417,8 +435,8 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
     gameRef.add(
       TextDamageComponent(
         "-${amount.toInt()}",
-        Position(position.center.dx, position.top),
-        config: config ?? TextConfig(fontSize: 14.sp, color: Colors.white),
+        Vector2(position.center.dx, position.top),
+        config: config ?? TextStyle(fontSize: 14.sp, color: Colors.white),
         initVelocityTop: initVelocityTop,
         gravity: gravity,
         direction: direction,
@@ -448,7 +466,6 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
         } else {
           this.receiveDamage(1, player);
         }
-
       },
     );
   }
@@ -457,20 +474,35 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
     timer.cancel();
     player.isLooting = false;
     this.isBeingDestroyed = false;
-    player.idle(forceAddAnimation: true);
+    player.idle();
   }
 
   void _showDialogLootable(Destroyable destroyable, GamePlayer player) {
     if (player.isLooting &&
         destroyable.destroyTimer != null &&
-        destroyable.destroyTimer.isActive) {
-      destroyable.stopDestroying(player, destroyable.destroyTimer);
+        destroyable.destroyTimer!.isActive) {
+      destroyable.stopDestroying(player, destroyable.destroyTimer!);
       return;
     }
     Get.dialog(
       LootableDialog(player, destroyable),
       barrierDismissible: true,
     );
+  }
+
+  @override
+  void onTapCancel() {
+    // TODO: implement onTapCancel
+  }
+
+  @override
+  void onTapDown(int pointer, Offset position) {
+    // TODO: implement onTapDown
+  }
+
+  @override
+  void onTapUp(int pointer, Offset position) {
+    // TODO: implement onTapUp
   }
 }
 
@@ -479,79 +511,94 @@ class Destroyable extends SimpleEnemy with TapGesture, ObjectCollision {
 SimpleDirectionAnimation generateSDA(
   String pathWithPrefix, {
   String prefix = "*d*",
-  textureHeight: 48.0,
-  textureWidth: 48.0,
+  double textureHeight = 48.0,
+  double textureWidth = 48.0,
 }) {
   String getFinalPath(Direction d) {
     return pathWithPrefix.replaceAll(prefix, d.getName());
   }
 
   return SimpleDirectionAnimation(
-    idleLeft: FlameAnimation.Animation.sequenced(
+    idleLeft: SpriteAnimation.load(
       getFinalPath(Direction.left),
-      1,
-      textureHeight: textureHeight,
-      textureWidth: textureWidth,
+      SpriteAnimationData.sequenced(
+        amount: 1,
+        textureSize: Vector2(textureWidth, textureHeight),
+        stepTime: 0.1,
+      ),
     ),
-    idleRight: FlameAnimation.Animation.sequenced(
+    idleRight: SpriteAnimation.load(
       getFinalPath(Direction.right),
-      1,
-      textureHeight: textureHeight,
-      textureWidth: textureWidth,
+      SpriteAnimationData.sequenced(
+        amount: 1,
+        textureSize: Vector2(textureWidth, textureHeight),
+        stepTime: 0.1,
+      ),
     ),
-    idleBottom: FlameAnimation.Animation.sequenced(
-      getFinalPath(Direction.bottom),
-      1,
-      textureHeight: textureHeight,
-      textureWidth: textureWidth,
+    idleDown: SpriteAnimation.load(
+      getFinalPath(Direction.down),
+      SpriteAnimationData.sequenced(
+        amount: 1,
+        textureSize: Vector2(textureWidth, textureHeight),
+        stepTime: 0.1,
+      ),
     ),
-    idleTop: FlameAnimation.Animation.sequenced(
-      getFinalPath(Direction.top),
-      1,
-      textureHeight: textureHeight,
-      textureWidth: textureWidth,
+    idleUp: SpriteAnimation.load(
+      getFinalPath(Direction.up),
+      SpriteAnimationData.sequenced(
+        amount: 1,
+        textureSize: Vector2(textureWidth, textureHeight),
+        stepTime: 0.1,
+      ),
     ),
     //
-    runLeft: FlameAnimation.Animation.sequenced(
+    runLeft: SpriteAnimation.load(
       getFinalPath(Direction.left),
-      1,
-      textureHeight: textureHeight,
-      textureWidth: textureWidth,
+      SpriteAnimationData.sequenced(
+        amount: 1,
+        textureSize: Vector2(textureWidth, textureHeight),
+        stepTime: 0.1,
+      ),
     ),
-    runRight: FlameAnimation.Animation.sequenced(
+    runRight: SpriteAnimation.load(
       getFinalPath(Direction.right),
-      1,
-      textureHeight: textureHeight,
-      textureWidth: textureWidth,
+      SpriteAnimationData.sequenced(
+        amount: 1,
+        textureSize: Vector2(textureWidth, textureHeight),
+        stepTime: 0.1,
+      ),
     ),
-    runBottom: FlameAnimation.Animation.sequenced(
-      getFinalPath(Direction.bottom),
-      1,
-      textureHeight: textureHeight,
-      textureWidth: textureWidth,
+    runDown: SpriteAnimation.load(
+      getFinalPath(Direction.down),
+      SpriteAnimationData.sequenced(
+        amount: 1,
+        textureSize: Vector2(textureWidth, textureHeight),
+        stepTime: 0.1,
+      ),
     ),
-    runTop: FlameAnimation.Animation.sequenced(
-      getFinalPath(Direction.top),
-      1,
-      textureHeight: textureHeight,
-      textureWidth: textureWidth,
+    runUp: SpriteAnimation.load(
+      getFinalPath(Direction.left),
+      SpriteAnimationData.sequenced(
+        amount: 1,
+        textureSize: Vector2(textureWidth, textureHeight),
+        stepTime: 0.1,
+      ),
     ),
     //
   );
 }
 
 CollisionArea generateFitCollision(
-  Direction direction,
-  AxisD axisD,
+  Direction? direction,
+  AxisD? axisD,
   double height,
   double width,
   LType type, {
-  @required Size hCollSize,
-  @required Size vCollSize,
+  required Size hCollSize,
+  required Size vCollSize,
 }) {
-  CollisionArea _hCollision = CollisionArea(
-    width: hCollSize.width,
-    height: hCollSize.height,
+  CollisionArea _hCollision = CollisionArea.rectangle(
+    size: Size(hCollSize.width, hCollSize.height),
     align: generateAlign(
       axisD,
       direction,
@@ -563,9 +610,8 @@ CollisionArea generateFitCollision(
     ),
   );
 
-  CollisionArea _vCollision = CollisionArea(
-    width: vCollSize.width,
-    height: vCollSize.height,
+  CollisionArea _vCollision = CollisionArea.rectangle(
+    size: Size(vCollSize.width, vCollSize.height),
     align: generateAlign(
       axisD,
       direction,
@@ -576,78 +622,76 @@ CollisionArea generateFitCollision(
       vCollSize: vCollSize,
     ),
   );
-  switch (axisD) {
-    case AxisD.h:
-      return _hCollision;
-      break;
-    case AxisD.v:
-      return _vCollision;
-      break;
-  }
 
-  switch (direction) {
-    case Direction.left:
-      return _vCollision;
-      break;
-    case Direction.right:
-      return _vCollision;
-      break;
-    case Direction.top:
-      return _hCollision;
-      break;
-    case Direction.bottom:
-      return _hCollision;
-      break;
-    default:
-      return _hCollision;
+  if (axisD != null) {
+    switch (axisD) {
+      case AxisD.h:
+        return _hCollision;
+
+      case AxisD.v:
+        return _vCollision;
+    }
+  } else {
+    switch (direction) {
+      case Direction.left:
+        return _vCollision;
+      case Direction.right:
+        return _vCollision;
+      case Direction.up:
+        return _hCollision;
+      case Direction.down:
+        return _hCollision;
+      default:
+        return _hCollision;
+    }
   }
 }
 
-Offset generateAlign(
-  AxisD axisD,
-  Direction direction,
+Vector2 generateAlign(
+  AxisD? axisD,
+  Direction? direction,
   double height,
   double width,
   LType type, {
-  Size hCollSize,
-  Size vCollSize,
+  Size? hCollSize,
+  Size? vCollSize,
 }) {
-  Offset finalOffset;
+  Vector2 finalOffset;
 
   switch (axisD) {
     case AxisD.h:
-      finalOffset = Offset(0, height * 0.5 - hCollSize.height * 0.5);
+      finalOffset = Vector2(0, height * 0.5 - hCollSize!.height * 0.5);
 
       if (type == LType.door)
-        finalOffset = Offset(finalOffset.dx, finalOffset.dy + 2.5);
+        finalOffset = Vector2(finalOffset.x, finalOffset.y + 2.5);
       break;
-    case AxisD.v:
-      finalOffset = Offset(width * 0.5 - vCollSize.width * 0.5, 0);
+    default:
+      finalOffset = Vector2(width * 0.5 - vCollSize!.width * 0.5, 0);
       if (type == LType.door)
-        finalOffset = Offset(finalOffset.dx + 2.5, finalOffset.dy);
+        finalOffset = Vector2(finalOffset.x + 2.5, finalOffset.y);
       break;
   }
 
   switch (direction) {
-    case Direction.left:
-      finalOffset = Offset(width - vCollSize.width, 0);
-      break;
     case Direction.right:
-      finalOffset = Offset(0, 0);
+      finalOffset = Vector2(0, 0);
       break;
-    case Direction.top:
-      finalOffset = Offset(0, height - hCollSize.height);
+    case Direction.up:
+      finalOffset = Vector2(0, height - hCollSize!.height);
       break;
-    case Direction.bottom:
-      finalOffset = Offset(0, 0);
+    case Direction.down:
+      finalOffset = Vector2(0, 0);
       break;
-    case Direction.topLeft:
+    case Direction.upLeft:
       break;
-    case Direction.topRight:
+    case Direction.upRight:
       break;
-    case Direction.bottomLeft:
+    case Direction.downLeft:
       break;
-    case Direction.bottomRight:
+    case Direction.downRight:
+      break;
+    default:
+      finalOffset = Vector2(width - vCollSize!.width, 0);
       break;
   }
 

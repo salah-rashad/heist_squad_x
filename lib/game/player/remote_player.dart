@@ -1,8 +1,6 @@
 import 'dart:math';
 
 import 'package:bonfire/bonfire.dart';
-import 'package:bonfire/util/collision/object_collision.dart';
-import 'package:flame/animation.dart' as FlameAnimation;
 import 'package:flutter/material.dart';
 import 'package:heist_squad_x/app/data/service/game_socket_manager.dart';
 import 'package:heist_squad_x/game/player/server_player_control.dart';
@@ -15,26 +13,26 @@ class RemotePlayer extends SimpleEnemy
   final int id;
   final String nick;
   String currentMove = 'IDLE';
-  TextConfig _textConfig;
+  TextStyle? _textStyle;
 
   RemotePlayer(
     this.id,
     this.nick,
-    Position initPosition,
+    Vector2 initPosition,
     SpriteSheet spriteSheet,
     GameSocketManager socketManager,
   ) : super(
           animation: SimpleDirectionAnimation(
-            idleTop: spriteSheet.createAnimation(0, stepTime: 0.1),
-            idleBottom: spriteSheet.createAnimation(1, stepTime: 0.1),
-            idleLeft: spriteSheet.createAnimation(2, stepTime: 0.1),
-            idleRight: spriteSheet.createAnimation(3, stepTime: 0.1),
-            runTop: spriteSheet.createAnimation(4, stepTime: 0.1),
-            runBottom: spriteSheet.createAnimation(5, stepTime: 0.1),
-            runLeft: spriteSheet.createAnimation(6, stepTime: 0.1),
-            runRight: spriteSheet.createAnimation(7, stepTime: 0.1),
+            idleUp: spriteSheet.createAnimation(row: 0, stepTime: 0.1),
+            idleDown: spriteSheet.createAnimation(row: 1, stepTime: 0.1),
+            idleLeft: spriteSheet.createAnimation(row: 2, stepTime: 0.1),
+            idleRight: spriteSheet.createAnimation(row: 3, stepTime: 0.1),
+            runUp: spriteSheet.createAnimation(row: 4, stepTime: 0.1),
+            runDown: spriteSheet.createAnimation(row: 5, stepTime: 0.1),
+            runLeft: spriteSheet.createAnimation(row: 6, stepTime: 0.1),
+            runRight: spriteSheet.createAnimation(row: 7, stepTime: 0.1),
           ),
-          initPosition: initPosition,
+          position: initPosition,
           width: tileSize * 1.5,
           height: tileSize * 1.5,
           life: 100,
@@ -43,17 +41,16 @@ class RemotePlayer extends SimpleEnemy
     setupCollision(
       CollisionConfig(
         collisions: [
-          CollisionArea(
-            height: (tileSize * 0.5),
-            width: (tileSize * 0.6),
-            align: Offset((tileSize * 0.9) / 2, tileSize),
+          CollisionArea.rectangle(
+            size: Size.square(tileSize * 0.5),
+            align: Vector2((tileSize * 0.9) / 2, tileSize),
           ),
         ],
       ),
     );
 
-    receivesAttackFrom = null;
-    _textConfig = TextConfig(
+    // receivesAttackFrom = null;
+    _textStyle = TextStyle(
       fontSize: tileSize / 4,
     );
     setupServerPlayerControl(socketManager, id);
@@ -68,45 +65,39 @@ class RemotePlayer extends SimpleEnemy
   void _move(move, double dtUpdate) {
     switch (move) {
       case 'LEFT':
-        this.customMoveLeft(speed * dtUpdate);
+        this.moveLeft(speed * dtUpdate);
         break;
       case 'RIGHT':
-        this.customMoveRight(speed * dtUpdate);
+        this.moveRight(speed * dtUpdate);
         break;
       case 'UP_RIGHT':
         double speedDiagonal = (speed * REDUCTION_SPEED_DIAGONAL) * dtUpdate;
-        customMoveRight(
-          speedDiagonal,
-        );
-        customMoveTop(speedDiagonal, addAnimation: false);
+        moveRight(speedDiagonal);
+        moveUp(speedDiagonal);
         break;
       case 'DOWN_RIGHT':
         double speedDiagonal = (speed * REDUCTION_SPEED_DIAGONAL) * dtUpdate;
-        customMoveRight(
-          speedDiagonal,
-        );
-        customMoveBottom(speedDiagonal, addAnimation: false);
+        moveRight(speedDiagonal);
+        moveDown(speedDiagonal);
 
         break;
       case 'DOWN_LEFT':
         double speedDiagonal = (speed * REDUCTION_SPEED_DIAGONAL) * dtUpdate;
-        customMoveLeft(
-          speedDiagonal,
-        );
-        customMoveBottom(speedDiagonal, addAnimation: false);
+        moveLeft(speedDiagonal);
+        moveDown(speedDiagonal);
         break;
       case 'UP_LEFT':
         double speedDiagonal = (speed * REDUCTION_SPEED_DIAGONAL) * dtUpdate;
-        customMoveLeft(
+        moveLeft(
           speedDiagonal,
         );
-        customMoveTop(speedDiagonal, addAnimation: false);
+        moveUp(speedDiagonal);
         break;
       case 'UP':
-        this.customMoveTop(speed * dtUpdate);
+        this.moveUp(speed * dtUpdate);
         break;
       case 'DOWN':
-        this.customMoveBottom(speed * dtUpdate);
+        this.moveDown(speed * dtUpdate);
         break;
       case 'IDLE':
         this.idle();
@@ -116,9 +107,9 @@ class RemotePlayer extends SimpleEnemy
 
   @override
   void render(Canvas canvas) {
-    if (this.isVisibleInCamera()) {
+    if (isVisible) {
       _renderNickName(canvas);
-      this.drawDefaultLifeBar(canvas, strokeWidth: 4, padding: 0);
+      this.drawDefaultLifeBar(canvas, borderWidth: 4, margin: 0);
     }
 
     super.render(canvas);
@@ -128,19 +119,21 @@ class RemotePlayer extends SimpleEnemy
   void die() {
     gameRef.add(
       AnimatedObjectOnce(
-        animation: FlameAnimation.Animation.sequenced(
+        animation: SpriteAnimation.load(
           "smoke_explosin.png",
-          6,
-          textureWidth: 16,
-          textureHeight: 16,
+          SpriteAnimationData.sequenced(
+            amount: 6,
+            stepTime: 0.1,
+            textureSize: this.vectorPosition,
+          ),
         ),
         position: position,
       ),
     );
-    gameRef.addGameComponent(
-      GameDecoration.sprite(
-        Sprite('crypt.png'),
-        position: Position(
+    gameRef.add(
+      GameDecoration.withSprite(
+        Sprite.load('crypt.png'),
+        position: Vector2(
           position.left,
           position.top,
         ),
@@ -148,31 +141,35 @@ class RemotePlayer extends SimpleEnemy
         width: 30,
       ),
     );
-    remove();
+    remove(this);
     super.die();
   }
 
   void _execAttack(String direction) {
-    var anim = FlameAnimation.Animation.sequenced(
-      'axe_spin_atack.png',
-      8,
-      textureWidth: 148,
-      textureHeight: 148,
-      stepTime: 0.05,
+    var anim = SpriteAnimation.load(
+      "axe_spin_atack.png",
+      SpriteAnimationData.sequenced(
+        amount: 8,
+        stepTime: 0.01,
+        textureSize: Vector2.all(148.0),
+      ),
     );
+
     this.simpleAttackRange(
       id: id,
       animationRight: anim,
       animationLeft: anim,
-      animationTop: anim,
-      animationBottom: anim,
+      animationUp: anim,
+      animationDown: anim,
       interval: 0,
       direction: direction.getDirection(),
-      animationDestroy: FlameAnimation.Animation.sequenced(
+      animationDestroy: SpriteAnimation.load(
         "smoke_explosin.png",
-        6,
-        textureWidth: 16,
-        textureHeight: 16,
+        SpriteAnimationData.sequenced(
+          amount: 6,
+          stepTime: 0.1,
+          textureSize: this.vectorPosition,
+        ),
       ),
       width: tileSize * 0.9,
       height: tileSize * 0.9,
@@ -180,9 +177,8 @@ class RemotePlayer extends SimpleEnemy
       damage: 15,
       collision: CollisionConfig(
         collisions: [
-          CollisionArea(
-            width: tileSize * 0.9,
-            height: tileSize * 0.9,
+          CollisionArea.rectangle(
+            size: Size.square(tileSize * 0.9),
           ),
         ],
       ),
@@ -212,7 +208,7 @@ class RemotePlayer extends SimpleEnemy
     ));
 
     if (dist > (tileSize * 0.5)) {
-      position = serverPosition;
+      position = Vector2Rect.fromRect(serverPosition);
     }
   }
 
@@ -228,7 +224,7 @@ class RemotePlayer extends SimpleEnemy
     if (!isDead) {
       this.showDamage(
         damage,
-        config: TextConfig(color: Colors.red, fontSize: 14),
+        config: TextStyle(color: Colors.red, fontSize: 14),
       );
       if (life > 0) {
         life -= damage;
@@ -240,13 +236,13 @@ class RemotePlayer extends SimpleEnemy
   }
 
   void _renderNickName(Canvas canvas) {
-    _textConfig.withColor(Colors.white).render(
-          canvas,
-          nick,
-          Position(
-            position.left + ((width - (nick.length * (width / 13))) / 2),
-            position.top - 20,
-          ),
-        );
+    TextPaint(style: _textStyle!.copyWith(color: Colors.white)).render(
+      canvas,
+      nick,
+      Vector2(
+        position.left + ((width - (nick.length * (width / 13))) / 2),
+        position.top - 20,
+      ),
+    );
   }
 }

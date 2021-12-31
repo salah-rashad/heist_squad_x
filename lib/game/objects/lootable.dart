@@ -1,73 +1,83 @@
 import 'dart:async';
-import 'dart:ui';
 
-import 'package:bonfire/bonfire.dart';
-import 'package:bonfire/util/collision/object_collision.dart';
-import 'package:flame/anchor.dart';
-import 'package:flame/animation.dart' as FlameAnimation;
-import 'package:flutter/foundation.dart';
+import 'package:bonfire/bonfire.dart' hide Timer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:heist_squad_x/app/theme/app_theme.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';
+import 'package:heist_squad_x/game/objects/breakable.dart';
 import 'package:heist_squad_x/game/player/game_player.dart';
 import 'package:heist_squad_x/game/utils/AxisD.dart';
+import 'package:heist_squad_x/game/utils/LootableType.dart';
 import 'package:heist_squad_x/game/utils/Weapon.dart';
 import 'package:heist_squad_x/game/utils/game_extensions.dart';
 
 class Lootable extends GameDecoration with TapGesture, ObjectCollision {
   bool isClose = false;
 
-  Timer lootTimer;
+  Timer? lootTimer;
 
   bool isBeingLooted = false;
   bool isLooted = false;
 
-  int currentGain;
-  final int maxGain;
+  int? currentGain;
+  final int? maxGain;
   final double height;
   final double width;
-  final bool frontFromPlayer;
-  final Position initPosition;
-  final Sprite sprite;
+  final Vector2 initPosition;
+  final Sprite? sprite;
 
-  final Direction direction;
-  final AxisD axisD;
+  final Direction? direction;
+  final AxisD? axisD;
 
-  TextConfig _textConfig;
+  final Size hCollSize;
+  final Size vCollSize;
+
+  TextPaint? _textPaint;
 
   Lootable(
     this.maxGain, {
     this.sprite,
-    @required this.initPosition,
-    @required this.height,
-    @required this.width,
-    this.frontFromPlayer = false,
-    FlameAnimation.Animation animation,
-    CollisionArea collision,
+    required this.initPosition,
+    required this.height,
+    required this.width,
+    SpriteAnimation? animation,
+    CollisionArea? collision,
     this.direction,
     this.axisD,
+    required this.hCollSize,
+    required this.vCollSize,
   }) : super(
           height: height,
           position: initPosition,
           width: width,
           animation: animation,
-          frontFromPlayer: frontFromPlayer,
           sprite: sprite,
         ) {
     currentGain = maxGain;
-    _textConfig = TextConfig(
-      fontSize: 12.sp,
-      color: isClose ? Palette.BLUE : Palette.WHITE,
-      fontFamily: AppTheme.appTheme.textTheme.bodyText1.fontFamily,
-      textAlign: TextAlign.center,
+    _textPaint = TextPaint(
+      style: TextStyle(
+        fontSize: 12.sp,
+        color: isClose ? Palette.BLUE : Palette.WHITE,
+        fontFamily: AppTheme.appTheme.textTheme.bodyText1!.fontFamily,
+      ),
+      // textAlign: TextAlign.center,
     );
 
     setupCollision(
       CollisionConfig(
         collisions: [
-          collision,
+          generateFitCollision(
+            direction!,
+            axisD!,
+            height,
+            width,
+            LType.normal,
+            hCollSize: hCollSize,
+            vCollSize: vCollSize,
+          ),
         ],
       ),
     );
@@ -77,17 +87,17 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
   void render(Canvas c) {
     super.render(c);
 
-    if (this.isVisibleInCamera()) {
+    if (isVisible) {
       String text = "$currentGain KG";
 
-      _textConfig.render(
+      _textPaint?.render(
         c,
         isClose ? "Loot\n$text" : text,
-        Position(
+        Vector2(
           rectCollision.center.dx,
           rectCollision.center.dy,
         ),
-        anchor: isClose ? directionThatPlayerIs().toAnchor() : Anchor.center,
+        anchor: isClose ? directionThePlayerIsIn()!.toAnchor() : Anchor.center,
       );
     }
   }
@@ -103,9 +113,11 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
     );
 
     if (isClose) {
-      _textConfig = _textConfig.withColor(Palette.WHITE);
+      _textPaint =
+          _textPaint?.copyWith((style) => style.copyWith(color: Palette.WHITE));
     } else {
-      _textConfig = _textConfig.withColor(Palette.WHITE24);
+      _textPaint = _textPaint
+          ?.copyWith((style) => style.copyWith(color: Palette.WHITE24));
     }
     super.update(dt);
   }
@@ -113,39 +125,39 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
   @override
   void onTap() {
     if (isClose) {
-      GamePlayer player = gameRef.player;
+      GamePlayer? player = gameRef.player as GamePlayer?;
 
-      if (!isBeingLooted) startLooting(player);
+      if (!isBeingLooted) startLooting(player!);
 
       switch (axisD) {
         case AxisD.h:
-          if (directionThatPlayerIs() == Direction.top) {
-            if (player.lastDirection == Direction.bottom) return;
+          if (directionThePlayerIsIn() == Direction.up) {
+            if (player?.lastDirection == Direction.down) return;
 
-            player.joystickChangeDirectional(
+            player?.joystickChangeDirectional(
               JoystickDirectionalEvent(
                   directional: JoystickMoveDirectional.MOVE_DOWN),
             );
           }
-          if (directionThatPlayerIs() == Direction.bottom) {
-            if (player.lastDirection == Direction.top) return;
+          if (directionThePlayerIsIn() == Direction.down) {
+            if (player?.lastDirection == Direction.up) return;
 
-            player.joystickChangeDirectional(
+            player?.joystickChangeDirectional(
               JoystickDirectionalEvent(
                   directional: JoystickMoveDirectional.MOVE_UP),
             );
           }
           break;
-        case AxisD.v:
-          if (directionThatPlayerIs() == Direction.right) {
-            if (player.lastDirection == Direction.left) return;
+        default:
+          if (directionThePlayerIsIn() == Direction.right) {
+            if (player!.lastDirection == Direction.left) return;
             player.joystickChangeDirectional(
               JoystickDirectionalEvent(
                   directional: JoystickMoveDirectional.MOVE_DOWN),
             );
           }
-          if (directionThatPlayerIs() == Direction.left) {
-            if (player.lastDirection == Direction.right) return;
+          if (directionThePlayerIsIn() == Direction.left) {
+            if (player!.lastDirection == Direction.right) return;
             player.joystickChangeDirectional(
               JoystickDirectionalEvent(
                   directional: JoystickMoveDirectional.MOVE_UP),
@@ -154,36 +166,36 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
           break;
       }
 
-      if (player.lastDirection == direction) return;
+      if (player!.lastDirection == direction) return;
 
       switch (direction) {
-        case Direction.left:
-          if (directionThatPlayerIs() == Direction.right)
-            player.joystickChangeDirectional(JoystickDirectionalEvent(
-                directional: JoystickMoveDirectional.MOVE_LEFT));
-          break;
         case Direction.right:
-          if (directionThatPlayerIs() == Direction.left)
+          if (directionThePlayerIsIn() == Direction.left)
             player.joystickChangeDirectional(JoystickDirectionalEvent(
                 directional: JoystickMoveDirectional.MOVE_RIGHT));
           break;
-        case Direction.top:
-          if (directionThatPlayerIs() == Direction.bottom)
+        case Direction.down:
+          if (directionThePlayerIsIn() == Direction.down)
             player.joystickChangeDirectional(JoystickDirectionalEvent(
                 directional: JoystickMoveDirectional.MOVE_UP));
           break;
-        case Direction.bottom:
-          if (directionThatPlayerIs() == Direction.top)
+        case Direction.up:
+          if (directionThePlayerIsIn() == Direction.up)
             player.joystickChangeDirectional(JoystickDirectionalEvent(
                 directional: JoystickMoveDirectional.MOVE_DOWN));
           break;
-        case Direction.topLeft:
+        case Direction.upLeft:
           break;
-        case Direction.topRight:
+        case Direction.upRight:
           break;
-        case Direction.bottomLeft:
+        case Direction.downLeft:
           break;
-        case Direction.bottomRight:
+        case Direction.downRight:
+          break;
+        default:
+          if (directionThePlayerIsIn() == Direction.right)
+            player.joystickChangeDirectional(JoystickDirectionalEvent(
+                directional: JoystickMoveDirectional.MOVE_LEFT));
           break;
       }
 
@@ -197,7 +209,7 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
   //! Start Destoying
 
   void startLooting(GamePlayer player) {
-    if (player.load >= player.maxLoad) {
+    if (player.load >= player.maxLoad!) {
       Fluttertoast.showToast(
         msg: "You are fully loaded, empty your bag first.",
         textColor: Palette.RED,
@@ -218,8 +230,8 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
         this.isBeingLooted = true;
         if (!isClose) return stopLooting(player, timer);
         if (player.life <= 0 ||
-            player.load >= player.maxLoad - 1 ||
-            this.currentGain <= 1) {
+            player.load >= player.maxLoad! - 1 ||
+            this.currentGain! <= 1) {
           this.loot(1, player);
           stopLooting(player, timer);
         } else {
@@ -235,27 +247,27 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
     timer.cancel();
     player.isLooting = false;
     this.isBeingLooted = false;
-    player.idle(forceAddAnimation: true);
+    player.idle();
   }
 
   void loot(int amount, GamePlayer player) {
     if (!isLooted) {
       showLoot(amount,
-          config: TextConfig(
+          config: TextStyle(
             fontSize: 22.0.sp,
             color: Palette.GREEN,
-            fontFamily: AppTheme.appTheme.textTheme.bodyText1.fontFamily,
+            fontFamily: AppTheme.appTheme.textTheme.bodyText1?.fontFamily,
           ),
           // onlyUp: true,
           gravity: 0.3,
           initVelocityTop: -7,
           onlyUp: true);
-      if (currentGain > 0) {
-        this.currentGain -= amount;
+      if (currentGain != null && currentGain! > 0) {
+        currentGain = currentGain! - amount;
         player.increaseLoad(amount);
-        if (currentGain <= 0) {
+        if (currentGain! <= 0) {
           isLooted = true;
-          remove();
+          remove(this);
         }
       }
     }
@@ -263,7 +275,7 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
 
   void showLoot(
     int amount, {
-    TextConfig config,
+    TextStyle? config,
     double initVelocityTop = -5,
     double gravity = 0.5,
     double maxDownSize = 20,
@@ -273,8 +285,8 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
     gameRef.add(
       TextDamageComponent(
         "+${amount.toInt()}",
-        Position(position.center.dx, position.top),
-        config: config ?? TextConfig(fontSize: 14.sp, color: Colors.white),
+        Vector2(position.center.dx, position.top),
+        config: config ?? TextStyle(fontSize: 14.sp, color: Colors.white),
         initVelocityTop: initVelocityTop,
         gravity: gravity,
         direction: direction,
@@ -285,10 +297,10 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
   }
 
   void playerSight({
-    Function(Player) onSight,
-    Function() notOnSight,
+    Function(Player)? onSight,
+    Function()? notOnSight,
   }) {
-    GamePlayer player = gameRef.player;
+    GamePlayer? player = (gameRef.player as GamePlayer?);
     if (player == null || this.position == null) return;
 
     if (player.isDead) {
@@ -300,54 +312,69 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
       if (onSight != null) onSight(player);
     }
 
-    if (player.isCloseTo(this.rectCollision)) {
+    if (player.isCloseTo(this.rectCollision.rect)) {
       switch (axisD) {
         case AxisD.h:
-          if (directionThatPlayerIs() == Direction.top ||
-              directionThatPlayerIs() == Direction.bottom) {
+          if (directionThePlayerIsIn() == Direction.up ||
+              directionThePlayerIsIn() == Direction.down) {
             checkOnSight();
           }
           break;
-        case AxisD.v:
-          if (directionThatPlayerIs() == Direction.right ||
-              directionThatPlayerIs() == Direction.left) {
+        default:
+          if (directionThePlayerIsIn() == Direction.right ||
+              directionThePlayerIsIn() == Direction.left) {
             checkOnSight();
           }
           break;
       }
 
       switch (direction) {
-        case Direction.left:
-          if (directionThatPlayerIs() == Direction.right) {
-            checkOnSight();
-          }
-          break;
         case Direction.right:
-          if (directionThatPlayerIs() == Direction.left) {
+          if (directionThePlayerIsIn() == Direction.left) {
             checkOnSight();
           }
           break;
-        case Direction.top:
-          if (directionThatPlayerIs() == Direction.bottom) {
+        case Direction.up:
+          if (directionThePlayerIsIn() == Direction.down) {
             checkOnSight();
           }
           break;
-        case Direction.bottom:
-          if (directionThatPlayerIs() == Direction.top) {
+        case Direction.down:
+          if (directionThePlayerIsIn() == Direction.up) {
             checkOnSight();
           }
           break;
-        case Direction.topLeft:
+        case Direction.upLeft:
           break;
-        case Direction.topRight:
+        case Direction.upRight:
           break;
-        case Direction.bottomLeft:
+        case Direction.downLeft:
           break;
-        case Direction.bottomRight:
+        case Direction.downRight:
+          break;
+        default:
+          if (directionThePlayerIsIn() == Direction.right) {
+            checkOnSight();
+          }
           break;
       }
     } else {
       if (notOnSight != null) notOnSight();
     }
+  }
+
+  @override
+  void onTapCancel() {
+    // TODO: implement onTapCancel
+  }
+
+  @override
+  void onTapDown(int pointer, Offset position) {
+    // TODO: implement onTapDown
+  }
+
+  @override
+  void onTapUp(int pointer, Offset position) {
+    // TODO: implement onTapUp
   }
 }

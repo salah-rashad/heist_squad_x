@@ -21,15 +21,15 @@ mixin ServerPlayerControl on GameComponent implements ServerPlayerActions {
   static const ACTION_ATTACK = 'ATTACK';
   static const ACTION_RECEIVED_DAMAGE = 'RECEIVED_DAMAGE';
   static const ACTION_PLAYER_LEAVED = 'PLAYER_LEAVED';
-  int _playerId;
-  BufferDelay _bufferMoveAndAttack;
+  int? _playerId;
+  BufferDelay? _bufferMoveAndAttack;
   void setupServerPlayerControl(
     GameSocketManager s,
     int id,
   ) {
     _playerId = id;
     _bufferMoveAndAttack = BufferDelay(200);
-    _bufferMoveAndAttack.listen(_listenBuffer);
+    _bufferMoveAndAttack!.listen(_listenBuffer);
     _setupSocket(s);
   }
 
@@ -47,7 +47,7 @@ mixin ServerPlayerControl on GameComponent implements ServerPlayerActions {
       } else if (action == ACTION_PLAYER_LEAVED) {
         serverPlayerLeave();
       } else {
-        _bufferMoveAndAttack.add(
+        _bufferMoveAndAttack!.add(
           data,
           DateTime.parse(time),
         );

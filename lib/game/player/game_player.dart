@@ -1,189 +1,109 @@
-import 'dart:ui';
-
 import 'package:bonfire/bonfire.dart' hide TiledWorldMap;
-import 'package:bonfire/util/collision/object_collision.dart';
-import 'package:flame/animation.dart' as FlameAnimation;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide TextStyle;
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/data/service/game_socket_manager.dart';
-import 'package:heist_squad_x/app/theme/app_theme.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';
 import 'package:heist_squad_x/game/objects/breakable.dart';
 import 'package:heist_squad_x/game/utils/Weapon.dart';
 import 'package:heist_squad_x/game/utils/game_extensions.dart';
 import 'package:heist_squad_x/main.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flame/anchor.dart';
+
 import 'other_anim.dart';
 
 class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
-  final Position initPosition;
-  final int id;
-  final String nick;
+  final Vector2 initPosition;
+  final int? id;
+  final String? nick;
   double load = 0.0;
-  double maxLoad = 20.0;
-  JoystickMoveDirectional currentDirection;
+  double? maxLoad = 20.0;
+  JoystickMoveDirectional? currentDirection;
   String directionEvent = 'IDLE';
-  String lastActionAnim;
-  String currentRoomId;
+  String? lastActionAnim;
+  String? currentRoomId;
   bool isLooting = false;
   List<Destroyable> lootables = <Destroyable>[];
-  final List<WeaponKey> weapons;
-  List<Destroyable> closeLootables;
+  final List<WeaponKey>? weapons;
+  List<Destroyable>? closeLootables;
 
-  TextConfig _textConfig;
+  TextPaint? _textConfig;
 
-  bool isMainPlayer = false;
+  // bool isMainPlayer = false;
 
   GamePlayer({
     this.id,
     this.nick,
-    this.initPosition,
+    required this.initPosition,
     this.currentRoomId,
     this.weapons,
     this.maxLoad,
-    @required SpriteSheet spriteSheet,
+    required SpriteSheet spriteSheet,
   }) : super(
+          initDirection: Direction.down,
           animation: SimpleDirectionAnimation(
-            idleBottom:
-                spriteSheet.createAnimation(1, stepTime: 0.1, from: 5, to: 6),
-            idleLeft:
-                spriteSheet.createAnimation(0, stepTime: 0.1, from: 1, to: 2),
-            idleRight:
-                spriteSheet.createAnimation(1, stepTime: 0.1, from: 1, to: 2),
-            idleTop:
-                spriteSheet.createAnimation(0, stepTime: 0.1, from: 5, to: 6),
-            runBottom:
-                spriteSheet.createAnimation(1, stepTime: 0.1, from: 4, to: 8),
-            runLeft:
-                spriteSheet.createAnimation(0, stepTime: 0.1, from: 0, to: 4),
-            runRight:
-                spriteSheet.createAnimation(1, stepTime: 0.1, from: 0, to: 4),
-            runTop:
-                spriteSheet.createAnimation(0, stepTime: 0.1, from: 4, to: 8),
-            others: {
-              ActionAnim.LootRight: spriteSheet.createAnimation(21,
-                  stepTime: 0.1, from: 1, to: 4),
-              ActionAnim.LootLeft: spriteSheet.createAnimation(20,
-                  stepTime: 0.1, from: 1, to: 4),
-              ActionAnim.LootTop: spriteSheet.createAnimation(20,
-                  stepTime: 0.1, from: 5, to: 8),
-              ActionAnim.LootBottom: spriteSheet.createAnimation(21,
-                  stepTime: 0.1, from: 5, to: 8),
-              /////////////////////////
-              ActionAnim.CrowbarRight: spriteSheet.createAnimation(17,
-                  stepTime: 0.1, from: 1, to: 4),
-              ActionAnim.CrowbarLeft: spriteSheet.createAnimation(16,
-                  stepTime: 0.1, from: 1, to: 4),
-              ActionAnim.CrowbarTop: spriteSheet.createAnimation(16,
-                  stepTime: 0.1, from: 5, to: 8),
-              ActionAnim.CrowbarBottom: spriteSheet.createAnimation(17,
-                  stepTime: 0.1, from: 5, to: 8),
-              /////////////////////////
-              ActionAnim.HammerRight:
-                  spriteSheet.createAnimation(5, stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.HammerLeft:
-                  spriteSheet.createAnimation(4, stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.HammerTop:
-                  spriteSheet.createAnimation(4, stepTime: 0.1, from: 4, to: 8),
-              ActionAnim.HammerBottom:
-                  spriteSheet.createAnimation(5, stepTime: 0.1, from: 4, to: 8),
-              /////////////////////////
-              ActionAnim.KeysRight:
-                  spriteSheet.createAnimation(7, stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.KeysLeft:
-                  spriteSheet.createAnimation(6, stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.KeysTop:
-                  spriteSheet.createAnimation(6, stepTime: 0.1, from: 4, to: 8),
-              ActionAnim.KeysBottom:
-                  spriteSheet.createAnimation(7, stepTime: 0.1, from: 4, to: 8),
-              /////////////////////////
-              ActionAnim.KnifeRight:
-                  spriteSheet.createAnimation(9, stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.KnifeLeft:
-                  spriteSheet.createAnimation(8, stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.KnifeTop:
-                  spriteSheet.createAnimation(8, stepTime: 0.1, from: 4, to: 8),
-              ActionAnim.KnifeBottom:
-                  spriteSheet.createAnimation(9, stepTime: 0.1, from: 4, to: 8),
-              /////////////////////////
-              ActionAnim.DrillRight: spriteSheet.createAnimation(11,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.DrillLeft: spriteSheet.createAnimation(10,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.DrillTop: spriteSheet.createAnimation(10,
-                  stepTime: 0.1, from: 4, to: 8),
-              ActionAnim.DrillBottom: spriteSheet.createAnimation(11,
-                  stepTime: 0.1, from: 4, to: 8),
-              /////////////////////////
-              ActionAnim.OscillatorRight: spriteSheet.createAnimation(13,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.OscillatorLeft: spriteSheet.createAnimation(12,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.OscillatorTop: spriteSheet.createAnimation(12,
-                  stepTime: 0.1, from: 4, to: 8),
-              ActionAnim.OscillatorBottom: spriteSheet.createAnimation(13,
-                  stepTime: 0.1, from: 4, to: 8),
-              /////////////////////////
-              ActionAnim.ComputerRight: spriteSheet.createAnimation(15,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.ComputerLeft: spriteSheet.createAnimation(14,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.ComputerTop: spriteSheet.createAnimation(14,
-                  stepTime: 0.1, from: 4, to: 8),
-              ActionAnim.ComputerBottom: spriteSheet.createAnimation(15,
-                  stepTime: 0.1, from: 4, to: 8),
-              /////////////////////////
-              ActionAnim.SawRight: spriteSheet.createAnimation(19,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.SawLeft: spriteSheet.createAnimation(18,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.SawTop: spriteSheet.createAnimation(18,
-                  stepTime: 0.1, from: 4, to: 8),
-              ActionAnim.SawBottom: spriteSheet.createAnimation(19,
-                  stepTime: 0.1, from: 4, to: 8),
-              /////////////////////////
-              ActionAnim.PliersRight: spriteSheet.createAnimation(23,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.PliersLeft: spriteSheet.createAnimation(22,
-                  stepTime: 0.1, from: 0, to: 4),
-              ActionAnim.PliersTop: spriteSheet.createAnimation(22,
-                  stepTime: 0.1, from: 4, to: 8),
-              ActionAnim.PliersBottom: spriteSheet.createAnimation(23,
-                  stepTime: 0.1, from: 4, to: 8),
-            },
+            idleDown: spriteSheet.createAnimation(
+                row: 1, stepTime: 0.1, from: 5, to: 6),
+            idleLeft: spriteSheet.createAnimation(
+                row: 0, stepTime: 0.1, from: 1, to: 2),
+            idleRight: spriteSheet.createAnimation(
+                row: 1, stepTime: 0.1, from: 1, to: 2),
+            idleUp: spriteSheet.createAnimation(
+                row: 0, stepTime: 0.1, from: 5, to: 6),
+            runDown: spriteSheet.createAnimation(
+                row: 1, stepTime: 0.1, from: 4, to: 8),
+            runLeft: spriteSheet.createAnimation(
+                row: 0, stepTime: 0.1, from: 0, to: 4),
+            runRight: spriteSheet.createAnimation(
+                row: 1, stepTime: 0.1, from: 0, to: 4),
+            runUp: spriteSheet.createAnimation(
+                row: 0, stepTime: 0.1, from: 4, to: 8),
+            others: ActionAnim.anims(spriteSheet),
           ),
-          width: tileSize.r,
-          height: tileSize.r,
-          initPosition: initPosition,
+          width: tileSize,
+          height: tileSize,
+          position: initPosition,
           life: 100,
-          speed: tileSize.r * 3,
+          speed: tileSize * 3,
         ) {
-    _textConfig = TextConfig(
-      fontSize: tileSize.r / 4,
-      color: Palette.WHITE,
-      fontFamily: AppTheme.appTheme.textTheme.bodyText1.fontFamily,
-      textAlign: TextAlign.center,
+    _textConfig = TextPaint(
+      style: TextStyle(
+        fontSize: tileSizeResponsive / 6,
+        color: Palette.WHITE,
+        // fontFamily: AppTheme.appTheme.textTheme.bodyText1?.fontFamily,
+      ),
+      // textAlign: TextAlign.center,
     );
 
     setupCollision(
       CollisionConfig(
         collisions: [
-          CollisionArea(
-            height: (tileSize.r * 0.7),
-            width: (tileSize.r * 0.7),
-            align: Offset(tileSize.r * 0.17, tileSize.r * 0.12),
+          CollisionArea.circle(
+            radius: tileSize * 0.3,
+            align: Vector2(tileSize * 0.2, tileSize * 0.2),
           ),
         ],
+      ),
+    );
+
+    setupLighting(
+      LightingConfig(
+        color: Colors.yellow.withOpacity(0.0),
+        radius: 150,
+        blurBorder: 150,
+        withPulse: false,
+        pulseVariation: 0.5,
+        pulseCurve: Curves.decelerate,
+        pulseSpeed: 2,
       ),
     );
   }
 
   void increaseLoad(int amount) {
     load += amount;
-    if (load >= maxLoad) {
-      load = maxLoad;
+    if (load >= maxLoad!) {
+      load = maxLoad!;
     }
   }
 
@@ -202,7 +122,7 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
 
   @override
   void joystickChangeDirectional(JoystickDirectionalEvent event) {
-    if (event.directional != currentDirection && position != null) {
+    if (event.directional != currentDirection) {
       currentDirection = event.directional;
       switch (currentDirection) {
         case JoystickMoveDirectional.MOVE_UP:
@@ -229,9 +149,8 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
         case JoystickMoveDirectional.MOVE_LEFT:
           directionEvent = 'LEFT';
           break;
-        case JoystickMoveDirectional.IDLE:
-          directionEvent = 'IDLE';
-          break;
+        default:
+          directionEvent = 'LEFT';
       }
       GameSocketManager().send(
         'message',
@@ -254,16 +173,18 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
     super.joystickChangeDirectional(event);
   }
 
-  void showEmote(FlameAnimation.Animation emoteAnimation) {
+  void showEmote(SpriteAnimation emoteAnimation) {
     gameRef.add(
       AnimatedFollowerObject(
-        animation: emoteAnimation,
+        animation: emoteAnimation.asFuture(),
         target: this,
-        positionFromTarget: Rect.fromLTWH(
-          25,
-          -10,
-          position.width / 2,
-          position.width / 2,
+        positionFromTarget: Vector2Rect.fromRect(
+          Rect.fromLTWH(
+            25,
+            -10,
+            position.width / 2,
+            position.width / 2,
+          ),
         ),
       ),
     );
@@ -271,31 +192,22 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
 
   @override
   void render(Canvas canvas) {
-    _textConfig.render(
+    _textConfig!.render(
       canvas,
-      nick,
-      Position(
+      nick ?? "UNKNOWN",
+      Vector2(
         position.center.dx,
-        position.topCenter.dy,
+        position.top,
       ),
       anchor: Anchor.bottomCenter,
     );
 
-    // lightingConfig = LightingConfig(
-    //   color: Colors.yellow.withOpacity(0.1),
-    //   radius: 100,
-    //   blurBorder: 100,
-    //   withPulse: false,
-    //   pulseVariation: 0.5,
-    //   pulseCurve: Curves.decelerate,
-    //   pulseSpeed: 2,
-    // );
     super.render(canvas);
   }
 
   @override
   void joystickAction(JoystickActionEvent action) {
-    if (gameRef.joystickController.keyboardEnable &&
+    if (gameRef.joystick!.keyboardConfig.enable &&
         action.id == LogicalKeyboardKey.space.keyId) {
       _execAttack();
     }
@@ -305,10 +217,10 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
     super.joystickAction(action);
   }
 
-  void _execAttack() {
-    if (load < 25 || isDead) {
-      return;
-    }
+  Future<void> _execAttack() async {
+    // if (load < 25 || isDead) {
+    //   return;
+    // }
     // decrementStamina(0);
     GameSocketManager().send('message', {
       'action': 'ATTACK',
@@ -323,28 +235,36 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
         },
       }
     });
-    var anim = FlameAnimation.Animation.sequenced('axe_spin_atack.png', 8,
-        textureWidth: 148, textureHeight: 148, stepTime: 0.05);
-    this.simpleAttackRange(
+    var anim = SpriteAnimation.load(
+      'axe_spin_atack.png',
+      SpriteAnimationData.sequenced(
+        amount: 8,
+        textureSize: Vector2.all(148.0),
+        stepTime: 0.05,
+      ),
+    );
+
+    simpleAttackRange(
       id: id,
       animationRight: anim,
       animationLeft: anim,
-      animationTop: anim,
-      animationBottom: anim,
-      animationDestroy: FlameAnimation.Animation.sequenced(
+      animationUp: anim,
+      animationDown: anim,
+      animationDestroy: SpriteAnimation.load(
         "smoke_explosin.png",
-        6,
-        textureWidth: 16,
-        textureHeight: 16,
+        SpriteAnimationData.sequenced(
+          amount: 6,
+          textureSize: Vector2.all(16.0),
+          stepTime: 0.1,
+        ),
       ),
       width: tileSize * 0.9,
       height: tileSize * 0.9,
       speed: speed * 1.5,
       damage: 15,
       collision: CollisionConfig(collisions: [
-        CollisionArea(
-          width: tileSize * 0.9,
-          height: tileSize * 0.9,
+        CollisionArea.rectangle(
+          size: Size.square(tileSize * 0.9),
         )
       ]),
     );
@@ -352,19 +272,22 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
 
   @override
   void receiveDamage(double damage, dynamic from) {
-    GameSocketManager().send('message', {
-      'action': 'RECEIVED_DAMAGE',
-      'room': currentRoomId,
-      'time': DateTime.now().toIso8601String(),
-      'data': {
-        'player_id': id,
-        'damage': damage,
-        'player_id_attack': from,
-      }
-    });
+    GameSocketManager().send(
+      'message',
+      {
+        'action': 'RECEIVED_DAMAGE',
+        'room': currentRoomId,
+        'time': DateTime.now().toIso8601String(),
+        'data': {
+          'player_id': id,
+          'damage': damage,
+          'player_id_attack': from,
+        }
+      },
+    );
     this.showDamage(
       damage,
-      config: TextConfig(
+      config: TextStyle(
         color: Colors.red,
         fontSize: 14,
       ),
@@ -377,19 +300,21 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
     life = 0;
     gameRef.add(
       AnimatedObjectOnce(
-        animation: FlameAnimation.Animation.sequenced(
+        animation: SpriteAnimation.load(
           "smoke_explosin.png",
-          6,
-          textureWidth: 16,
-          textureHeight: 16,
+          SpriteAnimationData.sequenced(
+            amount: 6,
+            textureSize: Vector2.all(16.0),
+            stepTime: 0.1,
+          ),
         ),
         position: position,
       ),
     );
-    gameRef.addGameComponent(
-      GameDecoration.sprite(
-        Sprite('crypt.png'),
-        position: Position(
+    gameRef.add(
+      GameDecoration.withSprite(
+        Sprite.load('crypt.png'),
+        position: Vector2(
           position.center.dx,
           position.center.dy,
         ),
@@ -397,15 +322,15 @@ class GamePlayer extends SimplePlayer with Lighting, ObjectCollision {
         width: 48,
       ),
     );
-    remove();
+    remove(this);
     super.die();
   }
 
   void playWeaponAnim(WeaponKey weaponKey, {bool forceAddAnimation = false}) {
     String action =
-        weaponKey.getName().capitalize + lastDirection.getName().capitalize;
+        weaponKey.getName().capitalize! + lastDirection.getName().capitalize!;
 
-    animation.playOther(action);
+    animation!.playOther(action);
 
     lastActionAnim = action;
   }

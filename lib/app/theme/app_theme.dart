@@ -1,7 +1,6 @@
 import 'package:flame_splash_screen/flame_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'color_theme.dart';
 
@@ -12,26 +11,29 @@ class AppTheme {
         primaryColorDark: Palette.BLUE2,
         fontFamily: GoogleFonts.cutiveMono().fontFamily,
         platform: TargetPlatform.iOS,
+        brightness: Brightness.dark,
         textTheme: GoogleFonts.cutiveMonoTextTheme().apply(
           bodyColor: Palette.WHITE,
         ),
+        highlightColor: Palette.TRANSPARENT,
         inputDecorationTheme: inputDecorationTheme,
         colorScheme: colorScheme,
         buttonTheme: ButtonThemeData(
-          padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 8.0.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 8.0.h),
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             primary: Palette.WHITE60,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 8.0.h),
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             primary: Palette.BLUE,
           ),
         ),
+        disabledColor: Palette.WHITE24,
         hintColor: Palette.WHITE24,
         indicatorColor: Palette.ORANGE,
       );
@@ -57,8 +59,8 @@ class AppTheme {
         filled: true,
         fillColor: Palette.BACKGROUND_LIGHT.withOpacity(0.5),
         contentPadding: EdgeInsets.symmetric(
-          vertical: 8.0.h,
-          horizontal: 16.0.w,
+          vertical: 8.0,
+          horizontal: 16.0,
         ),
       );
 }
@@ -68,7 +70,7 @@ class SplashTheme {
     backgroundDecoration: const BoxDecoration(color: Color(0xFFFFFFFF)),
     logoBuilder: (ctx) => Image.asset(
       'assets/logo/logo_dark.png',
-      width: 300.w,
+      width: 300,
     ),
   );
 
@@ -76,7 +78,7 @@ class SplashTheme {
     backgroundDecoration: const BoxDecoration(color: Color(0xFF000000)),
     logoBuilder: (ctx) => Image.asset(
       'assets/logo/logo_light.png',
-      width: 300.w,
+      width: 300,
     ),
   );
 }
