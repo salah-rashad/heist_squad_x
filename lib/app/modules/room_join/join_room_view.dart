@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/data/model/room_model.dart';
 import 'package:heist_squad_x/app/data/provider/database.dart';

@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/data/model/room_model.dart';
@@ -14,7 +13,6 @@ import 'package:heist_squad_x/app/modules/room/room_controller.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';
 import 'package:heist_squad_x/app/util/clipboard_util.dart';
 import 'package:heist_squad_x/app/util/futured.dart';
-import 'package:heist_squad_x/app/util/random_color.dart';
 import 'package:heist_squad_x/app/widgets/loading_widget.dart';
 
 class RoomView extends StatelessWidget {

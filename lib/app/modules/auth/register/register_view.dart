@@ -18,7 +18,7 @@ class RegisterView extends GetView<RegisterController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Expanded(
-                flex: 2,
+                flex: 3,
                 child: registerForm(),
               ),
               Expanded(
@@ -26,7 +26,7 @@ class RegisterView extends GetView<RegisterController> {
                 child: SizedBox(),
               ),
               Expanded(
-                flex: 2,
+                flex: 3,
                 child: rightSide(),
               ),
             ],
@@ -41,14 +41,14 @@ class RegisterView extends GetView<RegisterController> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Container(
-        //   child: Text(
-        //     "CREATE A NEW ACCOUNT",
-        //     style: TextStyle(fontSize: 22.0),
-        //   ),
-        //   alignment: Alignment.centerLeft,
-        //   padding: EdgeInsets.only(bottom: 32.0),
-        // ),
+        Container(
+          child: Text(
+            "CREATE A NEW ACCOUNT",
+            style: TextStyle(fontSize: 22.0),
+          ),
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.only(bottom: 32.0),
+        ),
         RegisterForm(),
       ],
     );
@@ -101,37 +101,30 @@ class RegisterView extends GetView<RegisterController> {
         SizedBox(
           height: 16.0,
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(child: SizedBox()),
-            ElevatedButton(
-              onPressed: () {
-                final formState = controller.registerFormKey.currentState;
-                if (formState!.validate()) {
-                  UserModel user = UserModel(
-                    email: controller.emailController.text,
-                    nick: controller.nicknameController.text,
-                    weapon: controller.selectedWeapon
-                        .toString()
-                        .split(".")[1]
-                        .capitalize!,
-                    active: false,
-                    skinId: 0,
-                  );
+        ElevatedButton(
+          onPressed: () {
+            final formState = controller.registerFormKey.currentState;
+            if (formState!.validate()) {
+              UserModel user = UserModel(
+                email: controller.emailController.text,
+                nick: controller.nicknameController.text,
+                weapon: controller.selectedWeapon
+                    .toString()
+                    .split(".")[1]
+                    .capitalize!,
+                active: false,
+                skinId: 0,
+              );
 
-                  Auth.i
-                      .createAccount(user, controller.passwordController.text);
-                }
-              },
-              child: Text('CREATE'),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 32.0),
-                primary: Palette.GREEN,
-                onPrimary: Palette.BACKGROUND_DARK,
-              ),
-            ),
-          ],
+              Auth.i.createAccount(user, controller.passwordController.text);
+            }
+          },
+          child: Text('CREATE'),
+          style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 32.0),
+              primary: Palette.GREEN,
+              onPrimary: Palette.BACKGROUND_DARK,
+              minimumSize: Size.fromHeight(60.0)),
         )
       ],
     );

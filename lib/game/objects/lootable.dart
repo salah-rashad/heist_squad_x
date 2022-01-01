@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bonfire/bonfire.dart' hide Timer;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -301,7 +300,7 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
     Function()? notOnSight,
   }) {
     GamePlayer? player = (gameRef.player as GamePlayer?);
-    if (player == null || this.position == null) return;
+    if (player == null) return;
 
     if (player.isDead) {
       if (notOnSight != null) notOnSight();
@@ -364,17 +363,11 @@ class Lootable extends GameDecoration with TapGesture, ObjectCollision {
   }
 
   @override
-  void onTapCancel() {
-    // TODO: implement onTapCancel
-  }
+  void onTapCancel() {}
 
   @override
-  void onTapDown(int pointer, Offset position) {
-    // TODO: implement onTapDown
-  }
+  void onTapDown(int pointer, Offset position) {}
 
   @override
-  void onTapUp(int pointer, Offset position) {
-    // TODO: implement onTapUp
-  }
+  void onTapUp(int pointer, Offset position) {}
 }

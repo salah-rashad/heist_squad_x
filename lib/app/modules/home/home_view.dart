@@ -10,6 +10,7 @@ import 'package:heist_squad_x/app/modules/home/home_controller.dart';
 import 'package:heist_squad_x/app/routes/app_pages.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';
 import 'package:heist_squad_x/app/widgets/flat_button_x.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeView extends GetView<HomeController> {
   @override
@@ -36,7 +37,7 @@ class HomeView extends GetView<HomeController> {
           padding: const EdgeInsets.only(left: 16.0),
           child: Image.asset(
             'assets/logo/logo_light.png',
-            width: 120.0,
+            width: 120.0.w,
           ),
         ),
         SizedBox(
@@ -70,20 +71,19 @@ class HomeView extends GetView<HomeController> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            StreamBuilder<QuerySnapshot<UserModel>>(
-                stream: Database.getOnlineUsers(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.active)
-                    return Text(
-                        "${snapshot.data?.docs.length} User(s) Online.");
-                  else
-                    return SizedBox();
-                }),
-          ],
+        Obx(
+          () => Auth.i.isSignedIn
+              ? StreamBuilder<QuerySnapshot<UserModel>>(
+                  stream: Database.getOnlineUsers(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.active)
+                      return Text(
+                          "${snapshot.data?.docs.length} User(s) Online.");
+                    else
+                      return SizedBox();
+                  },
+                )
+              : SizedBox.shrink(),
         ),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -99,11 +99,15 @@ class HomeView extends GetView<HomeController> {
             //         )
             //       : SizedBox.shrink(),
             // ),
-            IconButton(
-              color: Palette.RED,
-              icon: Icon(FontAwesomeIcons.signOutAlt),
-              iconSize: 24.0,
-              onPressed: () => Auth.auth.signOut(),
+            Obx(
+              () => Auth.i.isSignedIn
+                  ? IconButton(
+                      color: Palette.RED,
+                      icon: Icon(FontAwesomeIcons.signOutAlt),
+                      iconSize: 24.0,
+                      onPressed: () => Auth.auth.signOut(),
+                    )
+                  : SizedBox.shrink(),
             ),
             SizedBox(
               height: 8.0,
@@ -128,39 +132,29 @@ class HomeView extends GetView<HomeController> {
   List<Widget> offlineButtons() {
     return [
       FlatButtonX(
+        onPressed: () {},
+        child: Text(
+          "Solo Game",
+        ),
+      ),
+      FlatButtonX(
         onPressed: () async {
           Get.toNamed(Routes.LOGIN);
         },
         child: Text(
-          "Login",
-          style: TextStyle(fontSize: 18),
-        ),
-      ),
-      FlatButtonX(
-        onPressed: () {},
-        child: Text(
-          "Tutorial",
-          style: TextStyle(fontSize: 18),
+          "Multiplayer",
         ),
       ),
       FlatButtonX(
         onPressed: () {},
         child: Text(
           "Settings",
-          style: TextStyle(
-            fontSize: 18,
-            color: Palette.WHITE60,
-          ),
         ),
       ),
       FlatButtonX(
         onPressed: () {},
         child: Text(
           "About",
-          style: TextStyle(
-            fontSize: 18,
-            color: Palette.WHITE60,
-          ),
         ),
       ),
     ];

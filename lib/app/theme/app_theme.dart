@@ -12,8 +12,13 @@ class AppTheme {
         fontFamily: GoogleFonts.cutiveMono().fontFamily,
         platform: TargetPlatform.iOS,
         brightness: Brightness.dark,
-        textTheme: GoogleFonts.cutiveMonoTextTheme().apply(
+        textTheme: GoogleFonts.cutiveMonoTextTheme(
+          TextTheme(
+            button: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ).apply(
           bodyColor: Palette.WHITE,
+          fontSizeFactor: 1.0,
         ),
         highlightColor: Palette.TRANSPARENT,
         inputDecorationTheme: inputDecorationTheme,
@@ -75,7 +80,7 @@ class SplashTheme {
   );
 
   static FlameSplashTheme dark = FlameSplashTheme(
-    backgroundDecoration: const BoxDecoration(color: Color(0xFF000000)),
+    backgroundDecoration: const BoxDecoration(color: Palette.BACKGROUND_DARK),
     logoBuilder: (ctx) => Image.asset(
       'assets/logo/logo_light.png',
       width: 300,

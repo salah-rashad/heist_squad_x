@@ -15,11 +15,11 @@ class SplashScreenView extends GetView<SplashScreenController> {
         controller: controller.splashController,
         theme: SplashTheme.dark,
         onFinish: (ctx) {
-          Get.offNamed(Routes.HOME);
+          Get.offAndToNamed(Routes.HOME);
         },
         showBefore: (ctx) {
           return Text(
-            "Made with 💙 in Egypt",
+            "Made with ❤️ in Egypt",
             style: TextStyle(
               color: Palette.WHITE,
               fontSize: 14.0,
@@ -43,7 +43,8 @@ class SplashScreenView extends GetView<SplashScreenController> {
                 Container(
                   alignment: Alignment.center,
                   height: Get.height / 2,
-                  child: LogoComposite(),
+                  child:
+                      AnimatedLogo(animation: controller.animationController),
                 ),
                 SizedBox(
                   height: 16.0,

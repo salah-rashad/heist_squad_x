@@ -2,7 +2,6 @@ import 'package:bonfire/bonfire.dart' hide TiledWorldMap;
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:heist_squad_x/app/data/service/game_socket_manager.dart';
 import 'package:heist_squad_x/app/theme/color_theme.dart';

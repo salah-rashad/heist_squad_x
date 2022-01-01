@@ -19,6 +19,8 @@ class AppPages {
       name: Routes.SPLASH_SCREEN,
       page: () => SplashScreenView(),
       binding: SplashScreenBinding(),
+      transition: Transition.fade,
+      transitionDuration: 1.seconds,
     ),
     GetPage(
       name: Routes.LOGIN,
